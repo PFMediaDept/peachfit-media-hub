@@ -103,6 +103,41 @@ function getInitials(name) {
   return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
+// Subtask colors mapped to pipeline stage colors by sort_order
+const SUBTASK_COLORS = {
+  youtube: {
+    1: '#6B7280',  // Idea validated -- Idea Bank gray
+    2: '#F59E0B',  // Script drafted -- In Production amber
+    3: '#F59E0B',  // Script reviewed -- In Production amber
+    4: '#F59E0B',  // Filming scheduled -- In Production amber
+    5: '#F59E0B',  // Filming complete -- In Production amber
+    6: '#F59E0B',  // Raw footage uploaded -- In Production amber
+    7: '#3B82F6',  // Editor assigned -- Rough Cut blue
+    8: '#3B82F6',  // Rough cut delivered -- Rough Cut blue
+    9: '#EC4899',  // QC reviewed rough -- QC Review pink
+    10: '#EC4899', // Loom feedback sent -- QC Review pink
+    11: '#8B5CF6', // Revisions complete -- Final Cut purple
+    12: '#EC4899', // QC reviewed final -- QC Review pink
+    13: '#F97316', // Thumbnails designed -- Thumbnail Ready orange
+    14: '#F97316', // Thumbnail selected -- Thumbnail Ready orange
+    15: '#10B981', // Metadata prepared -- Publishing Queue green
+    16: '#37CA37', // Published -- Published green
+  },
+  'short-form': {
+    1: '#F59E0B',  // Script/talking points -- Script amber
+    2: '#3B82F6',  // Filming complete -- Filming blue
+    3: '#3B82F6',  // Raw footage uploaded -- Filming blue
+    4: '#8B5CF6',  // Editing complete -- Editing purple
+    5: '#8B5CF6',  // Captions added -- Editing purple
+    6: '#EC4899',  // QC review pass -- QC Review pink
+    7: '#10B981',  // Approved video uploaded -- Ready to Post green
+    8: '#10B981',  // Sound added -- Ready to Post green
+    9: '#10B981',  // Caption added -- Ready to Post green
+    10: '#37CA37', // Scheduled -- Scheduled green
+    11: '#37CA37', // Published -- Published green
+  },
+}
+
 // ── OPTION DEFINITIONS ──
 const YT_PILLARS = [{ value: 'transformation', label: 'Transformation' }, { value: 'educational', label: 'Educational' }, { value: 'experiment', label: 'Experiment' }, { value: 'grocery-meal', label: 'Grocery / Meal' }, { value: 'docu-series', label: 'Docu-Series' }]
 const YT_TIERS = [{ value: 'flagship', label: 'Flagship' }, { value: 'standard', label: 'Standard' }, { value: 'quick-turn', label: 'Quick Turnaround' }]
@@ -182,14 +217,33 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
               <label style={modal.label}>Subtasks ({completedCount}/{subtasks.length})</label>
               <div style={modal.progressTrack}><div style={{ ...modal.progressFill, width: subtasks.length > 0 ? (completedCount / subtasks.length * 100) + '%' : '0%' }} /></div>
               <div style={modal.subtaskList}>
-                {subtasks.map(st => (
-                  <div key={st.id} style={modal.subtaskItem} onClick={() => toggleSubtask(st)}>
-                    <div style={{ ...modal.checkbox, background: st.completed ? 'var(--green)' : 'transparent', borderColor: st.completed ? 'var(--green)' : 'var(--dark-border)' }}>
-                      {st.completed && <span style={{ color: 'var(--black)', fontSize: '10px', fontWeight: '700' }}>✓</span>}
+                {subtasks.map(st => {
+                  const stColor = st.color || SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280'
+                  const stAssignee = members.find(m => m.id === st.assignee_id)
+                  return (
+                    <div key={st.id} style={modal.subtaskItem}>
+                      <div style={{ ...modal.subtaskDot, background: stColor }} title={`Stage color`} />
+                      <div onClick={() => toggleSubtask(st)} style={{ ...modal.checkbox, background: st.completed ? 'var(--green)' : 'transparent', borderColor: st.completed ? 'var(--green)' : 'var(--dark-border)', cursor: 'pointer' }}>
+                        {st.completed && <span style={{ color: 'var(--black)', fontSize: '10px', fontWeight: '700' }}>✓</span>}
+                      </div>
+                      <span onClick={() => toggleSubtask(st)} style={{ textDecoration: st.completed ? 'line-through' : 'none', color: st.completed ? 'var(--text-muted)' : 'var(--text-primary)', fontSize: '13px', flex: 1, cursor: 'pointer' }}>{st.title}</span>
+                      <select
+                        value={st.assignee_id || ''}
+                        onClick={e => e.stopPropagation()}
+                        onChange={async e => {
+                          const val = e.target.value || null
+                          await supabase.from('pipeline_subtasks').update({ assignee_id: val }).eq('id', st.id)
+                          fetchSubtasks()
+                        }}
+                        style={modal.subtaskAssignee}
+                        title={stAssignee ? stAssignee.full_name : 'Assign'}
+                      >
+                        <option value="">--</option>
+                        {members.map(m => <option key={m.id} value={m.id}>{getInitials(m.full_name)}</option>)}
+                      </select>
                     </div>
-                    <span style={{ textDecoration: st.completed ? 'line-through' : 'none', color: st.completed ? 'var(--text-muted)' : 'var(--text-primary)', fontSize: '13px' }}>{st.title}</span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
             <div style={modal.section}>
@@ -486,7 +540,9 @@ const modal = {
   progressTrack: { height: '4px', background: 'var(--dark-border)', borderRadius: '2px', overflow: 'hidden', marginBottom: '10px' },
   progressFill: { height: '100%', background: 'var(--green)', borderRadius: '2px', transition: 'width 0.3s' },
   subtaskList: { display: 'flex', flexDirection: 'column', gap: '2px' },
-  subtaskItem: { display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer' },
+  subtaskItem: { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px' },
+  subtaskDot: { width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0 },
+  subtaskAssignee: { width: '52px', padding: '2px 4px', background: 'var(--dark)', border: '1px solid var(--dark-border)', borderRadius: '4px', color: 'var(--text-muted)', fontSize: '10px', outline: 'none', cursor: 'pointer', flexShrink: 0, textAlign: 'center' },
   checkbox: { width: '18px', height: '18px', borderRadius: '4px', border: '2px solid', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   comment: { padding: '10px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', marginBottom: '6px' },
   commentBtn: { padding: '8px 16px', background: 'var(--green)', color: 'var(--black)', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 },
