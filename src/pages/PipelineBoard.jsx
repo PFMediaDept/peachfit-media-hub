@@ -1,7 +1,36 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
+
+// ── HELPERS ──
+function getDueDateStyle(dateStr) {
+  if (!dateStr) return {}
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const due = new Date(dateStr + 'T00:00:00')
+  const diff = Math.floor((due - now) / (1000 * 60 * 60 * 24))
+  if (diff < 0) return { color: '#EF4444', fontWeight: '600' }
+  if (diff === 0) return { color: '#F59E0B', fontWeight: '600' }
+  if (diff <= 2) return { color: '#F59E0B' }
+  return { color: 'var(--text-muted)' }
+}
+
+function getDueDateLabel(dateStr) {
+  if (!dateStr) return ''
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
+  const due = new Date(dateStr + 'T00:00:00')
+  const diff = Math.floor((due - now) / (1000 * 60 * 60 * 24))
+  if (diff < 0) return 'Overdue'
+  if (diff === 0) return 'Due today'
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function getInitials(name) {
+  if (!name) return '?'
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+}
 
 // ── TASK DETAIL MODAL ──
 function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) {
@@ -46,7 +75,8 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
   async function handleSave() {
     setSaving(true)
     const { id, created_at, created_by, profiles, pipeline_subtasks, ...updates } = form
-    await supabase.from('pipeline_tasks').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', task.id)
+    const { error } = await supabase.from('pipeline_tasks').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', task.id)
+    if (error) console.error('Save error:', error)
     setSaving(false)
     onUpdate()
   }
@@ -59,31 +89,30 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
   }
 
   const completedCount = subtasks.filter(s => s.completed).length
-
   const isYouTube = branchSlug === 'youtube'
   const isShortForm = branchSlug === 'short-form'
+  const isAds = branchSlug === 'ads-creative'
+  const isProduction = branchSlug === 'production'
 
   return (
     <div style={modal.overlay} onClick={onClose}>
       <div style={modal.container} onClick={e => e.stopPropagation()}>
         <div style={modal.header}>
           <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} style={modal.titleInput} />
-          <button onClick={onClose} style={modal.closeBtn}>x</button>
+          <button onClick={onClose} style={modal.closeBtn}>✕</button>
         </div>
 
         <div style={modal.body}>
           <div style={modal.main}>
-            {/* Description */}
             <div style={modal.section}>
               <label style={modal.label}>Description / Notes</label>
               <textarea value={form.description || ''} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} style={modal.textarea} placeholder="Add notes..." />
             </div>
 
-            {/* Subtasks */}
             <div style={modal.section}>
               <label style={modal.label}>Subtasks ({completedCount}/{subtasks.length})</label>
               <div style={modal.progressTrack}>
-                <div style={{ ...modal.progressFill, width: subtasks.length > 0 ? `${(completedCount / subtasks.length) * 100}%` : '0%' }} />
+                <div style={{ ...modal.progressFill, width: subtasks.length > 0 ? (completedCount / subtasks.length * 100) + '%' : '0%' }} />
               </div>
               <div style={modal.subtaskList}>
                 {subtasks.map(st => (
@@ -97,7 +126,6 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
               </div>
             </div>
 
-            {/* Comments */}
             <div style={modal.section}>
               <label style={modal.label}>Activity</label>
               <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
@@ -106,7 +134,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
               </div>
               {comments.map(c => (
                 <div key={c.id} style={modal.comment}>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--green)' }}>{c.profiles?.full_name || 'Unknown'}</div>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--green)' }}>Note</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>{c.body}</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>{new Date(c.created_at).toLocaleString()}</div>
                 </div>
@@ -114,7 +142,6 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
             </div>
           </div>
 
-          {/* Sidebar fields */}
           <div style={modal.sidebar}>
             <div style={modal.field}>
               <label style={modal.label}>Status</label>
@@ -122,7 +149,6 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
                 {statuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
-
             <div style={modal.field}>
               <label style={modal.label}>Assignee</label>
               <select value={form.assignee_id || ''} onChange={e => setForm(p => ({ ...p, assignee_id: e.target.value || null }))} style={modal.input}>
@@ -130,7 +156,6 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
                 {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
               </select>
             </div>
-
             <div style={modal.field}>
               <label style={modal.label}>Priority</label>
               <select value={form.priority || ''} onChange={e => setForm(p => ({ ...p, priority: e.target.value || null }))} style={modal.input}>
@@ -140,187 +165,113 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
                 <option value="low">Low</option>
               </select>
             </div>
-
             <div style={modal.field}>
               <label style={modal.label}>Due Date</label>
               <input type="date" value={form.due_date || ''} onChange={e => setForm(p => ({ ...p, due_date: e.target.value || null }))} style={modal.input} />
             </div>
-
             <div style={modal.field}>
               <label style={modal.label}>Publish Date</label>
               <input type="date" value={form.publish_date || ''} onChange={e => setForm(p => ({ ...p, publish_date: e.target.value || null }))} style={modal.input} />
             </div>
 
-            {isYouTube && (
-              <>
-                <div style={modal.field}>
-                  <label style={modal.label}>Content Pillar</label>
-                  <select value={form.content_pillar || ''} onChange={e => setForm(p => ({ ...p, content_pillar: e.target.value || null }))} style={modal.input}>
-                    <option value="">Select...</option>
-                    <option value="transformation">Transformation</option>
-                    <option value="educational">Educational</option>
-                    <option value="experiment">Experiment</option>
-                    <option value="grocery-meal">Grocery / Meal</option>
-                    <option value="docu-series">Docu-Series</option>
-                  </select>
-                </div>
+            {isYouTube && (<>
+              <div style={modal.field}><label style={modal.label}>Content Pillar</label>
+                <select value={form.content_pillar || ''} onChange={e => setForm(p => ({ ...p, content_pillar: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="transformation">Transformation</option><option value="educational">Educational</option><option value="experiment">Experiment</option><option value="grocery-meal">Grocery / Meal</option><option value="docu-series">Docu-Series</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Content Tier</label>
+                <select value={form.content_tier || ''} onChange={e => setForm(p => ({ ...p, content_tier: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="flagship">Flagship</option><option value="standard">Standard</option><option value="quick-turn">Quick Turnaround</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Editor Assigned</label>
+                <input type="text" value={form.editor_assigned || ''} onChange={e => setForm(p => ({ ...p, editor_assigned: e.target.value }))} placeholder="Editor name" style={modal.input} /></div>
+              <div style={modal.field}><label style={modal.label}>QC Date</label>
+                <input type="date" value={form.qc_date || ''} onChange={e => setForm(p => ({ ...p, qc_date: e.target.value || null }))} style={modal.input} /></div>
+              <div style={modal.field}><label style={modal.label}>QC Result</label>
+                <select value={form.qc_result || ''} onChange={e => setForm(p => ({ ...p, qc_result: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="pass">Pass</option><option value="minor-revisions">Minor Revisions</option><option value="targeted-revisions">Targeted Revisions</option><option value="major-revisions">Major Revisions</option><option value="restart">Restart</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>QC Score (%)</label>
+                <input type="number" min="0" max="100" value={form.qc_score || ''} onChange={e => setForm(p => ({ ...p, qc_score: parseInt(e.target.value) || null }))} style={modal.input} /></div>
+              <div style={modal.field}><label style={modal.label}>Thumbnail Status</label>
+                <select value={form.thumbnail_status || 'not-started'} onChange={e => setForm(p => ({ ...p, thumbnail_status: e.target.value }))} style={modal.input}>
+                  <option value="not-started">Not Started</option><option value="in-progress">In Progress</option><option value="ready">Ready</option><option value="ab-testing">A/B Testing</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Talent</label>
+                {['Jacob Correia','Ryan Snow','Ethan Bernard','Frankie','Other'].map(t => (
+                  <label key={t} style={modal.checkLabel}><input type="checkbox" checked={(form.talent||[]).includes(t)} onChange={() => { const a=form.talent||[]; setForm(p=>({...p,talent:a.includes(t)?a.filter(x=>x!==t):[...a,t]})) }} />{t}</label>
+                ))}</div>
+            </>)}
 
-                <div style={modal.field}>
-                  <label style={modal.label}>Content Tier</label>
-                  <select value={form.content_tier || ''} onChange={e => setForm(p => ({ ...p, content_tier: e.target.value || null }))} style={modal.input}>
-                    <option value="">Select...</option>
-                    <option value="flagship">Flagship</option>
-                    <option value="standard">Standard</option>
-                    <option value="quick-turn">Quick Turnaround</option>
-                  </select>
-                </div>
+            {isShortForm && (<>
+              <div style={modal.field}><label style={modal.label}>Content Pillar</label>
+                <select value={form.content_pillar || ''} onChange={e => setForm(p => ({ ...p, content_pillar: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="transformation">Transformation</option><option value="cooking">Cooking</option><option value="education">Education</option><option value="lifestyle">Lifestyle</option><option value="trending-reactive">Trending / Reactive</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Content Tier</label>
+                <select value={form.content_tier || ''} onChange={e => setForm(p => ({ ...p, content_tier: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="quick-turn">Quick Turnaround</option><option value="standard">Standard</option><option value="high-production">High Production</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Backlog Week</label>
+                <input type="text" value={form.backlog_week || ''} onChange={e => setForm(p => ({ ...p, backlog_week: e.target.value }))} placeholder="e.g. Week of 3/31" style={modal.input} /></div>
+              <div style={modal.field}><label style={modal.label}>Platform</label>
+                {['Instagram Reels','TikTok','YouTube Shorts'].map(p => (
+                  <label key={p} style={modal.checkLabel}><input type="checkbox" checked={(form.platform||[]).includes(p)} onChange={() => { const a=form.platform||[]; setForm(prev=>({...prev,platform:a.includes(p)?a.filter(x=>x!==p):[...a,p]})) }} />{p}</label>
+                ))}</div>
+              <div style={modal.field}><label style={modal.label}>QC Reviewer</label>
+                <select value={form.qc_reviewer || ''} onChange={e => setForm(p => ({ ...p, qc_reviewer: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="Garrett Harper">Garrett Harper</option><option value="Jacob Correia">Jacob Correia</option><option value="Tommy Bannister">Tommy Bannister</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Talent</label>
+                {['Jacob Correia','Frankie','Ryan Snow','Ethan Bernard','Other'].map(t => (
+                  <label key={t} style={modal.checkLabel}><input type="checkbox" checked={(form.talent||[]).includes(t)} onChange={() => { const a=form.talent||[]; setForm(prev=>({...prev,talent:a.includes(t)?a.filter(x=>x!==t):[...a,t]})) }} />{t}</label>
+                ))}</div>
+            </>)}
 
-                <div style={modal.field}>
-                  <label style={modal.label}>Editor Assigned</label>
-                  <input type="text" value={form.editor_assigned || ''} onChange={e => setForm(p => ({ ...p, editor_assigned: e.target.value }))} placeholder="Editor name" style={modal.input} />
-                </div>
+            {isAds && (<>
+              <div style={modal.field}><label style={modal.label}>Content Pillar</label>
+                <select value={form.content_pillar || ''} onChange={e => setForm(p => ({ ...p, content_pillar: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="vsl">VSL</option><option value="ugc-style">UGC Style</option><option value="testimonial">Testimonial</option><option value="direct-response">Direct Response</option><option value="brand-awareness">Brand Awareness</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Content Tier</label>
+                <select value={form.content_tier || ''} onChange={e => setForm(p => ({ ...p, content_tier: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="hero">Hero (high production)</option><option value="standard">Standard</option><option value="iteration">Iteration / Hook Swap</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Editor Assigned</label>
+                <input type="text" value={form.editor_assigned || ''} onChange={e => setForm(p => ({ ...p, editor_assigned: e.target.value }))} placeholder="Editor name" style={modal.input} /></div>
+              <div style={modal.field}><label style={modal.label}>QC Result</label>
+                <select value={form.qc_result || ''} onChange={e => setForm(p => ({ ...p, qc_result: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="pass">Pass</option><option value="minor-revisions">Minor Revisions</option><option value="major-revisions">Major Revisions</option><option value="restart">Restart</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Talent</label>
+                {['Jacob Correia','Ryan Snow','Frankie','Other'].map(t => (
+                  <label key={t} style={modal.checkLabel}><input type="checkbox" checked={(form.talent||[]).includes(t)} onChange={() => { const a=form.talent||[]; setForm(p=>({...p,talent:a.includes(t)?a.filter(x=>x!==t):[...a,t]})) }} />{t}</label>
+                ))}</div>
+            </>)}
 
-                <div style={modal.field}>
-                  <label style={modal.label}>QC Date</label>
-                  <input type="date" value={form.qc_date || ''} onChange={e => setForm(p => ({ ...p, qc_date: e.target.value || null }))} style={modal.input} />
-                </div>
+            {isProduction && (<>
+              <div style={modal.field}><label style={modal.label}>Content Pillar</label>
+                <select value={form.content_pillar || ''} onChange={e => setForm(p => ({ ...p, content_pillar: e.target.value || null }))} style={modal.input}>
+                  <option value="">Select...</option><option value="youtube-shoot">YouTube Shoot</option><option value="ad-shoot">Ad Shoot</option><option value="photo-shoot">Photo Shoot</option><option value="b-roll">B-Roll Capture</option><option value="equipment">Equipment / Setup</option>
+                </select></div>
+              <div style={modal.field}><label style={modal.label}>Crew Lead / PA</label>
+                <input type="text" value={form.editor_assigned || ''} onChange={e => setForm(p => ({ ...p, editor_assigned: e.target.value }))} placeholder="Crew lead" style={modal.input} /></div>
+              <div style={modal.field}><label style={modal.label}>Talent</label>
+                {['Jacob Correia','Ryan Snow','Frankie','Other'].map(t => (
+                  <label key={t} style={modal.checkLabel}><input type="checkbox" checked={(form.talent||[]).includes(t)} onChange={() => { const a=form.talent||[]; setForm(p=>({...p,talent:a.includes(t)?a.filter(x=>x!==t):[...a,t]})) }} />{t}</label>
+                ))}</div>
+            </>)}
 
-                <div style={modal.field}>
-                  <label style={modal.label}>QC Result</label>
-                  <select value={form.qc_result || ''} onChange={e => setForm(p => ({ ...p, qc_result: e.target.value || null }))} style={modal.input}>
-                    <option value="">Select...</option>
-                    <option value="pass">Pass</option>
-                    <option value="minor-revisions">Minor Revisions</option>
-                    <option value="targeted-revisions">Targeted Revisions</option>
-                    <option value="major-revisions">Major Revisions</option>
-                    <option value="restart">Restart</option>
-                  </select>
-                </div>
-
-                <div style={modal.field}>
-                  <label style={modal.label}>QC Score (%)</label>
-                  <input type="number" min="0" max="100" value={form.qc_score || ''} onChange={e => setForm(p => ({ ...p, qc_score: parseInt(e.target.value) || null }))} style={modal.input} />
-                </div>
-
-                <div style={modal.field}>
-                  <label style={modal.label}>Thumbnail Status</label>
-                  <select value={form.thumbnail_status || 'not-started'} onChange={e => setForm(p => ({ ...p, thumbnail_status: e.target.value }))} style={modal.input}>
-                    <option value="not-started">Not Started</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="ready">Ready</option>
-                    <option value="ab-testing">A/B Testing</option>
-                  </select>
-                </div>
-
-                <div style={modal.field}>
-                  <label style={modal.label}>Talent</label>
-                  {['Jacob Correia', 'Ryan Snow', 'Ethan Bernard', 'Frankie', 'Other'].map(t => (
-                    <label key={t} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                      <input type="checkbox" checked={(form.talent || []).includes(t)} onChange={() => {
-                        const arr = form.talent || []
-                        setForm(p => ({ ...p, talent: arr.includes(t) ? arr.filter(x => x !== t) : [...arr, t] }))
-                      }} />
-                      {t}
-                    </label>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {isShortForm && (
-              <>
-                <div style={modal.field}>
-                  <label style={modal.label}>Content Pillar</label>
-                  <select value={form.content_pillar || ''} onChange={e => setForm(p => ({ ...p, content_pillar: e.target.value || null }))} style={modal.input}>
-                    <option value="">Select...</option>
-                    <option value="transformation">Transformation</option>
-                    <option value="cooking">Cooking</option>
-                    <option value="education">Education</option>
-                    <option value="lifestyle">Lifestyle</option>
-                    <option value="trending-reactive">Trending / Reactive</option>
-                  </select>
-                </div>
-
-                <div style={modal.field}>
-                  <label style={modal.label}>Content Tier</label>
-                  <select value={form.content_tier || ''} onChange={e => setForm(p => ({ ...p, content_tier: e.target.value || null }))} style={modal.input}>
-                    <option value="">Select...</option>
-                    <option value="quick-turn">Quick Turnaround</option>
-                    <option value="standard">Standard</option>
-                    <option value="high-production">High Production</option>
-                  </select>
-                </div>
-
-                <div style={modal.field}>
-                  <label style={modal.label}>Backlog Week</label>
-                  <input type="text" value={form.backlog_week || ''} onChange={e => setForm(p => ({ ...p, backlog_week: e.target.value }))} placeholder="e.g. Week of 3/31" style={modal.input} />
-                </div>
-
-                <div style={modal.field}>
-                  <label style={modal.label}>Platform</label>
-                  {['Instagram Reels', 'TikTok', 'YouTube Shorts'].map(p => (
-                    <label key={p} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                      <input type="checkbox" checked={(form.platform || []).includes(p)} onChange={() => {
-                        const arr = form.platform || []
-                        setForm(prev => ({ ...prev, platform: arr.includes(p) ? arr.filter(x => x !== p) : [...arr, p] }))
-                      }} />
-                      {p}
-                    </label>
-                  ))}
-                </div>
-
-                <div style={modal.field}>
-                  <label style={modal.label}>QC Reviewer</label>
-                  <select value={form.qc_reviewer || ''} onChange={e => setForm(p => ({ ...p, qc_reviewer: e.target.value || null }))} style={modal.input}>
-                    <option value="">Select...</option>
-                    <option value="Garrett Harper">Garrett Harper</option>
-                    <option value="Jacob Correia">Jacob Correia</option>
-                    <option value="Tommy Bannister">Tommy Bannister</option>
-                  </select>
-                </div>
-
-                <div style={modal.field}>
-                  <label style={modal.label}>Talent</label>
-                  {['Jacob Correia', 'Frankie', 'Ryan Snow', 'Ethan Bernard', 'Other'].map(t => (
-                    <label key={t} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                      <input type="checkbox" checked={(form.talent || []).includes(t)} onChange={() => {
-                        const arr = form.talent || []
-                        setForm(prev => ({ ...prev, talent: arr.includes(t) ? arr.filter(x => x !== t) : [...arr, t] }))
-                      }} />
-                      {t}
-                    </label>
-                  ))}
-                </div>
-              </>
-            )}
-
-            <div style={modal.field}>
-              <label style={modal.label}>First Pass</label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                <input type="checkbox" checked={form.first_pass || false} onChange={e => setForm(p => ({ ...p, first_pass: e.target.checked }))} />
-                Completed
-              </label>
-            </div>
-
-            <div style={modal.field}>
-              <label style={modal.label}>Script Link</label>
-              <input type="url" value={form.script_link || ''} onChange={e => setForm(p => ({ ...p, script_link: e.target.value }))} placeholder="Google Doc URL" style={modal.input} />
-            </div>
-
-            <div style={modal.field}>
-              <label style={modal.label}>Drive Folder</label>
-              <input type="url" value={form.drive_folder_link || ''} onChange={e => setForm(p => ({ ...p, drive_folder_link: e.target.value }))} placeholder="Google Drive URL" style={modal.input} />
-            </div>
-
-            <div style={modal.field}>
-              <label style={modal.label}>Video Link</label>
-              <input type="url" value={form.video_link || ''} onChange={e => setForm(p => ({ ...p, video_link: e.target.value }))} placeholder="Drive link to video file" style={modal.input} />
-            </div>
-
-            <div style={modal.field}>
-              <label style={modal.label}>Google Doc (briefs/notes)</label>
-              <input type="url" value={form.google_doc_link || ''} onChange={e => setForm(p => ({ ...p, google_doc_link: e.target.value }))} placeholder="Google Doc URL" style={modal.input} />
-            </div>
+            <div style={modal.field}><label style={modal.label}>First Pass</label>
+              <label style={modal.checkLabel}><input type="checkbox" checked={form.first_pass || false} onChange={e => setForm(p => ({ ...p, first_pass: e.target.checked }))} />Completed</label></div>
+            <div style={modal.field}><label style={modal.label}>Script Link</label>
+              <input type="url" value={form.script_link || ''} onChange={e => setForm(p => ({ ...p, script_link: e.target.value }))} placeholder="Google Doc URL" style={modal.input} /></div>
+            <div style={modal.field}><label style={modal.label}>Drive Folder</label>
+              <input type="url" value={form.drive_folder_link || ''} onChange={e => setForm(p => ({ ...p, drive_folder_link: e.target.value }))} placeholder="Google Drive URL" style={modal.input} /></div>
+            <div style={modal.field}><label style={modal.label}>Video Link</label>
+              <input type="url" value={form.video_link || ''} onChange={e => setForm(p => ({ ...p, video_link: e.target.value }))} placeholder="Drive link to video file" style={modal.input} /></div>
+            <div style={modal.field}><label style={modal.label}>Google Doc (briefs/notes)</label>
+              <input type="url" value={form.google_doc_link || ''} onChange={e => setForm(p => ({ ...p, google_doc_link: e.target.value }))} placeholder="Google Doc URL" style={modal.input} /></div>
 
             <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
               <button onClick={handleSave} disabled={saving} style={modal.saveBtn}>{saving ? 'Saving...' : 'Save Changes'}</button>
@@ -334,12 +285,17 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
 }
 
 // ── TASK CARD ──
-function TaskCard({ task, onClick }) {
+function TaskCard({ task, members, subtaskCounts, onClick }) {
   const priorityColors = { high: '#EF4444', medium: '#F59E0B', low: '#3B82F6' }
+  const assignee = members.find(m => m.id === task.assignee_id)
+  const dueDateStyle = getDueDateStyle(task.due_date)
+  const dueDateLabel = getDueDateLabel(task.due_date)
+  const stCount = subtaskCounts[task.id]
 
   return (
     <div style={board.card} onClick={() => onClick(task)} draggable
-      onDragStart={e => { e.dataTransfer.setData('taskId', task.id); e.dataTransfer.setData('fromStatus', task.status_id) }}>
+      onDragStart={e => { e.dataTransfer.setData('taskId', task.id); e.dataTransfer.setData('fromStatus', task.status_id); e.currentTarget.style.opacity = '0.4' }}
+      onDragEnd={e => { e.currentTarget.style.opacity = '1' }}>
       <div style={board.cardTitle}>{task.title}</div>
       <div style={board.cardMeta}>
         {task.priority && <span style={{ ...board.tag, background: priorityColors[task.priority] + '20', color: priorityColors[task.priority] }}>{task.priority}</span>}
@@ -347,9 +303,14 @@ function TaskCard({ task, onClick }) {
         {task.content_tier && <span style={board.tag}>{task.content_tier}</span>}
       </div>
       <div style={board.cardFooter}>
-        {task.assignee_id && <span style={board.assigneeBadge}>{task.profiles?.full_name?.charAt(0) || '?'}</span>}
-        {task.due_date && <span style={board.dueDate}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+        {assignee && <span style={board.assigneeBadge} title={assignee.full_name}>{getInitials(assignee.full_name)}</span>}
+        {task.due_date && <span style={{ ...board.dueDate, ...dueDateStyle }} title={task.due_date}>{dueDateLabel}</span>}
         {task.thumbnail_status && task.thumbnail_status !== 'not-started' && <span style={{ ...board.tag, fontSize: '10px' }}>🖼 {task.thumbnail_status}</span>}
+        {stCount && stCount.total > 0 && (
+          <span style={{ ...board.tag, fontSize: '10px', color: stCount.done === stCount.total ? 'var(--green)' : 'var(--text-muted)' }}>
+            ✓ {stCount.done}/{stCount.total}
+          </span>
+        )}
       </div>
     </div>
   )
@@ -362,15 +323,14 @@ export default function PipelineBoard() {
   const [statuses, setStatuses] = useState([])
   const [tasks, setTasks] = useState([])
   const [members, setMembers] = useState([])
+  const [subtaskCounts, setSubtaskCounts] = useState({})
   const [selectedTask, setSelectedTask] = useState(null)
   const [newTaskStatus, setNewTaskStatus] = useState(null)
   const [newTitle, setNewTitle] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [dragOverColumn, setDragOverColumn] = useState(null)
 
-  useEffect(() => {
-    fetchStatuses()
-    fetchTasks()
-    fetchMembers()
-  }, [slug])
+  useEffect(() => { fetchStatuses(); fetchTasks(); fetchMembers() }, [slug])
 
   async function fetchStatuses() {
     const { data } = await supabase.from('pipeline_statuses').select('*').eq('branch_slug', slug).order('sort_order')
@@ -378,8 +338,21 @@ export default function PipelineBoard() {
   }
 
   async function fetchTasks() {
-    const { data } = await supabase.from('pipeline_tasks').select('*').eq('branch_slug', slug).order('sort_order')
-    setTasks(data || [])
+    const { data, error } = await supabase.from('pipeline_tasks').select('*').eq('branch_slug', slug).order('sort_order')
+    if (error) console.error('fetchTasks error:', error)
+    const list = data || []
+    setTasks(list)
+    if (list.length > 0) {
+      const ids = list.map(t => t.id)
+      const { data: subs } = await supabase.from('pipeline_subtasks').select('task_id, completed').in('task_id', ids)
+      const counts = {}
+      ;(subs || []).forEach(s => {
+        if (!counts[s.task_id]) counts[s.task_id] = { done: 0, total: 0 }
+        counts[s.task_id].total++
+        if (s.completed) counts[s.task_id].done++
+      })
+      setSubtaskCounts(counts)
+    }
   }
 
   async function fetchMembers() {
@@ -390,16 +363,11 @@ export default function PipelineBoard() {
   async function createTask(statusId) {
     if (!newTitle.trim()) return
     const maxOrder = Math.max(0, ...tasks.filter(t => t.status_id === statusId).map(t => t.sort_order || 0))
-    await supabase.from('pipeline_tasks').insert({
-      branch_slug: slug,
-      status_id: statusId,
-      title: newTitle.trim(),
-      sort_order: maxOrder + 1,
-      created_by: user.id,
+    const { error } = await supabase.from('pipeline_tasks').insert({
+      branch_slug: slug, status_id: statusId, title: newTitle.trim(), sort_order: maxOrder + 1, created_by: user.id,
     })
-    setNewTitle('')
-    setNewTaskStatus(null)
-    fetchTasks()
+    if (error) console.error('createTask error:', error)
+    setNewTitle(''); setNewTaskStatus(null); fetchTasks()
   }
 
   async function moveTask(taskId, toStatusId) {
@@ -409,35 +377,42 @@ export default function PipelineBoard() {
   }
 
   function handleDrop(e, statusId) {
-    e.preventDefault()
+    e.preventDefault(); setDragOverColumn(null)
     const taskId = e.dataTransfer.getData('taskId')
     const fromStatus = e.dataTransfer.getData('fromStatus')
-    if (fromStatus !== statusId) {
-      moveTask(taskId, statusId)
-    }
+    if (fromStatus !== statusId) moveTask(taskId, statusId)
   }
+
+  const filtered = searchQuery.trim()
+    ? tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) || (t.content_pillar||'').toLowerCase().includes(searchQuery.toLowerCase()) || (t.editor_assigned||'').toLowerCase().includes(searchQuery.toLowerCase()) || (t.description||'').toLowerCase().includes(searchQuery.toLowerCase()))
+    : tasks
 
   return (
     <div>
+      <div style={board.toolbar}>
+        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search tasks..." style={board.searchInput} />
+        <span style={board.taskCount}>{filtered.length} task{filtered.length !== 1 ? 's' : ''}</span>
+      </div>
+
       <div style={board.container}>
         {statuses.map(status => {
-          const columnTasks = tasks.filter(t => t.status_id === status.id)
+          const col = filtered.filter(t => t.status_id === status.id)
+          const isOver = dragOverColumn === status.id
           return (
-            <div key={status.id} style={board.column}
-              onDragOver={e => e.preventDefault()}
+            <div key={status.id} style={{ ...board.column, ...(isOver ? board.columnDragOver : {}) }}
+              onDragOver={e => { e.preventDefault(); setDragOverColumn(status.id) }}
+              onDragLeave={() => setDragOverColumn(null)}
               onDrop={e => handleDrop(e, status.id)}>
               <div style={board.columnHeader}>
-                <div style={{ ...board.statusDot, background: status.color }} />
-                <span style={board.columnName}>{status.name}</span>
-                <span style={board.columnCount}>{columnTasks.length}</span>
+                <div style={{ ...board.statusPill, background: status.color + '20', color: status.color, borderColor: status.color + '40' }}>
+                  <div style={{ ...board.statusDot, background: status.color }} />
+                  {status.name}
+                </div>
+                <span style={board.columnCount}>{col.length}</span>
               </div>
-
               <div style={board.cardList}>
-                {columnTasks.map(task => (
-                  <TaskCard key={task.id} task={task} onClick={setSelectedTask} />
-                ))}
+                {col.map(task => (<TaskCard key={task.id} task={task} members={members} subtaskCounts={subtaskCounts} onClick={setSelectedTask} />))}
               </div>
-
               {newTaskStatus === status.id ? (
                 <div style={board.newTaskForm}>
                   <input type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') createTask(status.id); if (e.key === 'Escape') setNewTaskStatus(null) }} placeholder="Task title..." autoFocus style={board.newTaskInput} />
@@ -455,14 +430,8 @@ export default function PipelineBoard() {
       </div>
 
       {selectedTask && (
-        <TaskDetail
-          task={selectedTask}
-          statuses={statuses}
-          members={members}
-          branchSlug={slug}
-          onClose={() => setSelectedTask(null)}
-          onUpdate={() => { fetchTasks(); setSelectedTask(null) }}
-        />
+        <TaskDetail task={selectedTask} statuses={statuses} members={members} branchSlug={slug}
+          onClose={() => setSelectedTask(null)} onUpdate={() => { fetchTasks(); setSelectedTask(null) }} />
       )}
     </div>
   )
@@ -470,20 +439,24 @@ export default function PipelineBoard() {
 
 // ── STYLES ──
 const board = {
-  container: { display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '20px', minHeight: 'calc(100vh - 200px)' },
-  column: { minWidth: '280px', maxWidth: '280px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column' },
-  columnHeader: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', padding: '4px 0' },
-  statusDot: { width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0 },
-  columnName: { fontSize: '13px', fontWeight: '600', color: 'var(--white)', flex: 1 },
+  toolbar: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' },
+  searchInput: { padding: '8px 14px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '8px', color: 'var(--white)', fontSize: '13px', outline: 'none', width: '260px' },
+  taskCount: { fontSize: '12px', color: 'var(--text-muted)' },
+  container: { display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '20px', minHeight: 'calc(100vh - 240px)' },
+  column: { minWidth: '280px', maxWidth: '280px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '12px', display: 'flex', flexDirection: 'column', transition: 'background 0.15s' },
+  columnDragOver: { background: 'rgba(55,202,55,0.04)', outline: '1px dashed rgba(55,202,55,0.3)', outlineOffset: '-1px' },
+  columnHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', padding: '2px 0' },
+  statusPill: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', border: '1px solid', letterSpacing: '0.2px' },
+  statusDot: { width: '7px', height: '7px', borderRadius: '50%', flexShrink: 0 },
   columnCount: { fontSize: '12px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: '10px' },
   cardList: { display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 },
-  card: { padding: '12px 14px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '8px', cursor: 'pointer', transition: 'border-color 0.15s' },
+  card: { padding: '12px 14px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '8px', cursor: 'pointer', transition: 'border-color 0.15s, opacity 0.15s' },
   cardTitle: { fontSize: '13px', fontWeight: '500', color: 'var(--white)', marginBottom: '8px', lineHeight: '1.4' },
   cardMeta: { display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '6px' },
   tag: { padding: '2px 6px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'capitalize' },
-  cardFooter: { display: 'flex', alignItems: 'center', gap: '6px' },
-  assigneeBadge: { width: '20px', height: '20px', borderRadius: '50%', background: 'var(--green)', color: 'var(--black)', fontSize: '10px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  dueDate: { fontSize: '11px', color: 'var(--text-muted)' },
+  cardFooter: { display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' },
+  assigneeBadge: { width: '22px', height: '22px', borderRadius: '50%', background: 'var(--green)', color: 'var(--black)', fontSize: '9px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', letterSpacing: '-0.5px' },
+  dueDate: { fontSize: '11px' },
   addTaskBtn: { padding: '8px', background: 'transparent', border: '1px dashed var(--dark-border)', borderRadius: '8px', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', marginTop: '6px', textAlign: 'center' },
   newTaskForm: { padding: '10px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '8px', marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '8px' },
   newTaskInput: { padding: '8px 10px', background: 'var(--dark)', border: '1px solid var(--dark-border)', borderRadius: '6px', color: 'var(--white)', fontSize: '13px', outline: 'none' },
@@ -496,7 +469,7 @@ const modal = {
   container: { width: '100%', maxWidth: '1000px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '16px', margin: '0 20px 40px', overflow: 'hidden' },
   header: { display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 24px', borderBottom: '1px solid var(--dark-border)' },
   titleInput: { flex: 1, background: 'transparent', border: 'none', color: 'var(--white)', fontSize: '18px', fontWeight: '600', outline: 'none' },
-  closeBtn: { width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', border: 'none', color: 'var(--text-muted)', fontSize: '16px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  closeBtn: { width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', border: 'none', color: 'var(--text-muted)', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   body: { display: 'flex', minHeight: '500px' },
   main: { flex: 1, padding: '24px', overflowY: 'auto', maxHeight: '70vh' },
   sidebar: { width: '320px', padding: '24px', borderLeft: '1px solid var(--dark-border)', overflowY: 'auto', maxHeight: '70vh', display: 'flex', flexDirection: 'column', gap: '12px' },
@@ -505,6 +478,7 @@ const modal = {
   input: { width: '100%', padding: '8px 10px', background: 'var(--dark)', border: '1px solid var(--dark-border)', borderRadius: '6px', color: 'var(--white)', fontSize: '13px', outline: 'none' },
   textarea: { width: '100%', padding: '10px 12px', background: 'var(--dark)', border: '1px solid var(--dark-border)', borderRadius: '8px', color: 'var(--white)', fontSize: '13px', outline: 'none', resize: 'vertical', fontFamily: 'inherit' },
   field: { display: 'flex', flexDirection: 'column', gap: '4px' },
+  checkLabel: { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)', cursor: 'pointer' },
   progressTrack: { height: '4px', background: 'var(--dark-border)', borderRadius: '2px', overflow: 'hidden', marginBottom: '10px' },
   progressFill: { height: '100%', background: 'var(--green)', borderRadius: '2px', transition: 'width 0.3s' },
   subtaskList: { display: 'flex', flexDirection: 'column', gap: '2px' },
