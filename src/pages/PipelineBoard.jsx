@@ -254,7 +254,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
               <div style={modal.progressTrack}><div style={{ ...modal.progressFill, width: subtasks.length > 0 ? (completedCount / subtasks.length * 100) + '%' : '0%' }} /></div>
               <div style={modal.subtaskList}>
                 {subtasks.map(st => {
-                  const stColor = (st.color && st.color !== '#6B7280') ? st.color : SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280'
+                  const stColor = st.color || SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280'
                   const stAssignee = members.find(m => m.id === st.assignee_id)
                   return (
                     <div key={st.id} style={modal.subtaskItem}>
@@ -384,24 +384,38 @@ function TaskCard({ task, members, subtaskCounts, onClick }) {
   const assignee = members.find(m => m.id === task.assignee_id)
   const dueDateStyle = getDueDateStyle(task.due_date)
   const dueDateLabel = getDueDateLabel(task.due_date)
+  const pubDateLabel = task.publish_date ? new Date(task.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''
   const stCount = subtaskCounts[task.id]
   const pillarColor = getPillColor(task.content_pillar)
   const tierColor = getPillColor(task.content_tier)
+  const talentList = (task.talent || []).join(', ')
 
   return (
     <div style={board.card} onClick={() => onClick(task)} draggable
       onDragStart={e => { e.dataTransfer.setData('taskId', task.id); e.dataTransfer.setData('fromStatus', task.status_id); e.currentTarget.style.opacity = '0.4' }}
       onDragEnd={e => { e.currentTarget.style.opacity = '1' }}>
+      {/* Title */}
       <div style={board.cardTitle}>{task.title}</div>
+
+      {/* Tags row: priority, pillar, tier */}
       <div style={board.cardMeta}>
         {task.priority && <span style={{ ...board.tag, background: priorityColors[task.priority] + '20', color: priorityColors[task.priority] }}>{task.priority}</span>}
         {task.content_pillar && <span style={{ ...board.tag, background: pillarColor + '18', color: pillarColor }}>{task.content_pillar}</span>}
         {task.content_tier && <span style={{ ...board.tag, background: tierColor + '18', color: tierColor }}>{task.content_tier}</span>}
+        {task.thumbnail_status && task.thumbnail_status !== 'not-started' && <span style={{ ...board.tag, background: 'rgba(249,115,22,0.15)', color: '#F97316' }}>🖼 {task.thumbnail_status}</span>}
       </div>
+
+      {/* Info rows */}
+      <div style={board.cardDetails}>
+        {talentList && <div style={board.cardDetail}><span style={board.cardDetailLabel}>Talent</span><span style={board.cardDetailValue}>{talentList}</span></div>}
+        {task.editor_assigned && <div style={board.cardDetail}><span style={board.cardDetailLabel}>Editor</span><span style={board.cardDetailValue}>{task.editor_assigned}</span></div>}
+      </div>
+
+      {/* Footer: assignee, dates, subtasks */}
       <div style={board.cardFooter}>
         {assignee && <span style={board.assigneeBadge} title={assignee.full_name}>{getInitials(assignee.full_name)}</span>}
-        {task.due_date && <span style={{ ...board.dueDate, ...dueDateStyle }} title={task.due_date}>{dueDateLabel}</span>}
-        {task.thumbnail_status && task.thumbnail_status !== 'not-started' && <span style={{ ...board.tag, fontSize: '10px' }}>🖼 {task.thumbnail_status}</span>}
+        {task.due_date && <span style={{ ...board.cardDatePill, ...dueDateStyle }}>{dueDateLabel}</span>}
+        {pubDateLabel && <span style={board.cardDatePill} title="Publish date">📅 {pubDateLabel}</span>}
         {stCount && stCount.total > 0 && (
           <span style={{ ...board.tag, fontSize: '10px', color: stCount.done === stCount.total ? 'var(--green)' : 'var(--text-muted)' }}>✓ {stCount.done}/{stCount.total}</span>
         )}
@@ -540,7 +554,12 @@ const board = {
   cardTitle: { fontSize: '13px', fontWeight: '500', color: 'var(--white)', marginBottom: '8px', lineHeight: '1.4' },
   cardMeta: { display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '6px' },
   tag: { padding: '2px 6px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', fontSize: '11px', color: 'var(--text-muted)', textTransform: 'capitalize' },
-  cardFooter: { display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' },
+  cardFooter: { display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginTop: '6px', paddingTop: '8px', borderTop: '1px solid var(--dark-border)' },
+  cardDetails: { display: 'flex', flexDirection: 'column', gap: '3px', marginTop: '4px' },
+  cardDetail: { display: 'flex', gap: '6px', fontSize: '11px', lineHeight: '1.3' },
+  cardDetailLabel: { color: 'var(--text-muted)', flexShrink: 0, minWidth: '38px' },
+  cardDetailValue: { color: 'var(--text-secondary)' },
+  cardDatePill: { fontSize: '11px', color: 'var(--text-muted)', padding: '1px 6px', background: 'rgba(255,255,255,0.04)', borderRadius: '4px' },
   assigneeBadge: { width: '22px', height: '22px', borderRadius: '50%', background: 'var(--green)', color: 'var(--black)', fontSize: '9px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', letterSpacing: '-0.5px' },
   dueDate: { fontSize: '11px' },
   addTaskBtn: { padding: '8px', background: 'transparent', border: '1px dashed var(--dark-border)', borderRadius: '8px', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer', marginTop: '6px', textAlign: 'center' },
