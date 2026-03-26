@@ -254,7 +254,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
               <div style={modal.progressTrack}><div style={{ ...modal.progressFill, width: subtasks.length > 0 ? (completedCount / subtasks.length * 100) + '%' : '0%' }} /></div>
               <div style={modal.subtaskList}>
                 {subtasks.map(st => {
-                  const stColor = st.color || SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280'
+                  const stColor = (st.color && st.color !== '#6B7280') ? st.color : SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280'
                   const stAssignee = members.find(m => m.id === st.assignee_id)
                   return (
                     <div key={st.id} style={modal.subtaskItem}>
