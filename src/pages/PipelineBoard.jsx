@@ -271,7 +271,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
                           await supabase.from('pipeline_subtasks').update({ assignee_id: val }).eq('id', st.id)
                           fetchSubtasks()
                         }}
-                        style={modal.subtaskAssignee}
+                        style={modal.subtaskAssigneePill}
                         title={stAssignee ? stAssignee.full_name : 'Assign'}
                       >
                         <option value="">--</option>
@@ -594,7 +594,7 @@ const modal = {
   subtaskList: { display: 'flex', flexDirection: 'column', gap: '2px' },
   subtaskItem: { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px' },
   subtaskDot: { width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0 },
-  subtaskAssignee: { width: '52px', padding: '2px 4px', background: 'var(--dark)', border: '1px solid var(--dark-border)', borderRadius: '4px', color: 'var(--text-muted)', fontSize: '10px', outline: 'none', cursor: 'pointer', flexShrink: 0, textAlign: 'center' },
+  subtaskAssigneePill: { padding: '2px 8px', background: 'rgba(55,202,55,0.1)', border: '1px solid rgba(55,202,55,0.2)', borderRadius: '12px', color: 'var(--green)', fontSize: '11px', fontWeight: '500', outline: 'none', cursor: 'pointer', flexShrink: 0, fontFamily: 'inherit', minWidth: '70px', textAlign: 'center', appearance: 'none', WebkitAppearance: 'none' },
   checkbox: { width: '18px', height: '18px', borderRadius: '4px', border: '2px solid', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   comment: { padding: '10px 12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', marginBottom: '6px' },
   commentBtn: { padding: '8px 16px', background: 'var(--green)', color: 'var(--black)', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', flexShrink: 0 },
