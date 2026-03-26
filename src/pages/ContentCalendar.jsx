@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/AuthContext'
 
@@ -96,7 +97,7 @@ function BacklogMeter({ tasks }) {
 }
 
 // ── CALENDAR EVENT PILL ──
-function EventPill({ task, statuses }) {
+function EventPill({ task, statuses, onClickTask }) {
   const branch = BRANCH_COLORS[task.branch_slug] || BRANCH_COLORS.youtube
   const statusName = statuses.find(st => st.id === task.status_id)?.name || ''
   const statusColor = STATUS_COLORS[statusName] || '#6B7280'
@@ -107,9 +108,10 @@ function EventPill({ task, statuses }) {
   const isSF = task.branch_slug === 'short-form'
 
   return (
-    <div style={{ ...s.eventPill, background: branch.light, borderLeft: '3px solid ' + branch.bg }} title={`${task.title}\nStatus: ${statusName}\nTalent: ${talent || 'TBD'}`}>
+    <div onClick={() => onClickTask(task)} style={{ ...s.eventPill, background: branch.light, borderLeft: '3px solid ' + branch.bg, cursor: 'pointer' }} title={`${task.title}\nStatus: ${statusName}\nTalent: ${talent || 'TBD'}\nClick to open task`}>
       <div style={s.eventTop}>
         <span style={{ ...s.eventBranch, color: branch.bg }}>{branch.label}</span>
+        {task.is_sob && <span style={s.eventSOB}>SOB</span>}
         <span style={{ ...s.eventStatus, background: statusColor + '20', color: statusColor }}>{statusName}</span>
       </div>
       <div style={s.eventTitle}>{task.title}</div>
@@ -118,12 +120,13 @@ function EventPill({ task, statuses }) {
         {isSF && platforms && <span style={s.eventPlatforms}>{platforms}</span>}
         {task.content_pillar && <span style={{ ...s.eventPillar, color: pillarColor || 'var(--text-muted)' }}>{task.content_pillar}</span>}
       </div>
+      {(task.drive_folder_link || task.video_link) && <div style={s.eventLink}>📁 Drive</div>}
     </div>
   )
 }
 
 // ── MONTH VIEW ──
-function MonthView({ year, month, tasksByDate, statuses }) {
+function MonthView({ year, month, tasksByDate, statuses, onClickTask }) {
   const firstDay = new Date(year, month, 1)
   const lastDay = new Date(year, month + 1, 0)
   const startOffset = firstDay.getDay()
@@ -161,7 +164,7 @@ function MonthView({ year, month, tasksByDate, statuses }) {
                 {day && <div style={{ ...s.monthCellDay, ...(isToday ? { color: 'var(--green)', fontWeight: '700' } : {}) }}>{day}</div>}
                 <div style={s.monthCellEvents}>
                   {events.slice(0, 3).map(t => (
-                    <EventPill key={t.id} task={t} statuses={statuses} />
+                    <EventPill key={t.id} task={t} statuses={statuses} onClickTask={onClickTask} />
                   ))}
                   {events.length > 3 && <div style={s.eventMore}>+{events.length - 3} more</div>}
                 </div>
@@ -175,7 +178,7 @@ function MonthView({ year, month, tasksByDate, statuses }) {
 }
 
 // ── WEEK VIEW ──
-function WeekView({ weekStart, tasksByDate, statuses }) {
+function WeekView({ weekStart, tasksByDate, statuses, onClickTask }) {
   const today = formatDate(new Date())
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
@@ -192,7 +195,7 @@ function WeekView({ weekStart, tasksByDate, statuses }) {
               {dayLabel}
             </div>
             <div style={s.weekEvents}>
-              {events.map(t => <EventPill key={t.id} task={t} statuses={statuses} />)}
+              {events.map(t => <EventPill key={t.id} task={t} statuses={statuses} onClickTask={onClickTask} />)}
               {events.length === 0 && <div style={s.weekEmpty}>No content</div>}
             </div>
           </div>
@@ -204,6 +207,7 @@ function WeekView({ weekStart, tasksByDate, statuses }) {
 
 // ── MAIN CALENDAR ──
 export default function ContentCalendar() {
+  const navigate = useNavigate()
   const [tasks, setTasks] = useState([])
   const [statuses, setStatuses] = useState([])
   const [view, setView] = useState('month')
@@ -222,6 +226,10 @@ export default function ContentCalendar() {
     setTasks(tasksRes.data || [])
     setStatuses(statusRes.data || [])
     setLoading(false)
+  }
+
+  function handleClickTask(task) {
+    navigate(`/branch/${task.branch_slug}/pipeline`)
   }
 
   const filtered = branchFilter === 'all' ? tasks : tasks.filter(t => t.branch_slug === branchFilter)
@@ -293,8 +301,8 @@ export default function ContentCalendar() {
 
       {/* Calendar */}
       {view === 'month'
-        ? <MonthView year={year} month={month} tasksByDate={tasksByDate} statuses={statuses} />
-        : <WeekView weekStart={weekStart} tasksByDate={tasksByDate} statuses={statuses} />
+        ? <MonthView year={year} month={month} tasksByDate={tasksByDate} statuses={statuses} onClickTask={handleClickTask} />
+        : <WeekView weekStart={weekStart} tasksByDate={tasksByDate} statuses={statuses} onClickTask={handleClickTask} />
       }
     </div>
   )
@@ -361,4 +369,6 @@ const s = {
   eventTalent: { fontSize: '9px', color: 'var(--text-muted)' },
   eventPlatforms: { fontSize: '9px', color: 'var(--peach)', fontWeight: '600' },
   eventPillar: { fontSize: '9px', fontWeight: '500' },
+  eventSOB: { fontSize: '8px', fontWeight: '700', padding: '1px 5px', borderRadius: '3px', background: 'rgba(244,171,156,0.2)', color: '#F4AB9C', letterSpacing: '0.3px' },
+  eventLink: { fontSize: '9px', color: 'var(--green)', marginTop: '2px', opacity: 0.7 },
 }
