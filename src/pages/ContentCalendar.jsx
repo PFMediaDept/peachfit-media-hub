@@ -1,374 +1,807 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
-import { useAuth } from '../lib/AuthContext'
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { supabase } from '../lib/supabase';
 
-// ── CONSTANTS ──
+/* ── brand tokens ── */
+const GREEN = '#37CA37';
+const NEON = '#07FB89';
+const PEACH = '#F4AB9C';
+const BG = '#0C0C0C';
+const CARD = '#141414';
+const CARD_LIGHT = '#1A1A1A';
+const BORDER = '#2A2A2A';
+const WHITE = '#FFFFFF';
+
 const BRANCH_COLORS = {
-  youtube: { bg: '#378ADD', light: 'rgba(55,138,221,0.12)', border: 'rgba(55,138,221,0.3)', label: 'YouTube' },
-  'short-form': { bg: '#7F77DD', light: 'rgba(127,119,221,0.12)', border: 'rgba(127,119,221,0.3)', label: 'Short Form' },
-  'ads-creative': { bg: '#D85A30', light: 'rgba(216,90,48,0.12)', border: 'rgba(216,90,48,0.3)', label: 'Ads' },
-  production: { bg: '#D4537E', light: 'rgba(212,83,126,0.12)', border: 'rgba(212,83,126,0.3)', label: 'Production' },
+  youtube: '#FF0000',
+  'short-form': '#8B5CF6',
+  'ads-creative': '#F59E0B',
+  production: '#3B82F6',
+};
+
+const BRANCH_LABELS = {
+  youtube: 'YouTube',
+  'short-form': 'Short Form',
+  'ads-creative': 'Ads/Creative',
+  production: 'Production',
+};
+
+const PRIORITY_COLORS = {
+  urgent: '#EF4444',
+  high: '#F59E0B',
+  medium: '#3B82F6',
+  low: '#6B7280',
+};
+
+const SUBTASK_COLORS = {
+  youtube: {
+    1: '#6B7280', 2: '#F59E0B', 3: '#F59E0B', 4: '#F59E0B',
+    5: '#F59E0B', 6: '#F59E0B', 7: '#3B82F6', 8: '#3B82F6',
+    9: '#EC4899', 10: '#EC4899', 11: '#8B5CF6', 12: '#EC4899',
+    13: '#F97316', 14: '#F97316', 15: '#10B981', 16: '#37CA37',
+  },
+  'short-form': {
+    1: '#F59E0B', 2: '#3B82F6', 3: '#3B82F6', 4: '#8B5CF6',
+    5: '#8B5CF6', 6: '#EC4899', 7: '#10B981', 8: '#10B981',
+    9: '#10B981', 10: '#37CA37', 11: '#37CA37',
+  },
+  'ads-creative': {
+    1: '#F59E0B', 2: '#F59E0B', 3: '#3B82F6', 4: '#8B5CF6',
+    5: '#EC4899', 6: '#EC4899', 7: '#10B981', 8: '#37CA37', 9: '#6B7280',
+  },
+  production: {
+    1: '#F59E0B', 2: '#3B82F6', 3: '#8B5CF6', 4: '#EC4899',
+    5: '#10B981', 6: '#6B7280',
+  },
+};
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+/* ── helpers ── */
+const fmt = (d) => d.toISOString().split('T')[0];
+const sameDay = (a, b) => fmt(a) === fmt(b);
+const parseLocal = (s) => { const [y,m,d] = s.split('-'); return new Date(y, m-1, d); };
+
+function dueColor(due) {
+  if (!due) return '#6B7280';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = parseLocal(due); d.setHours(0,0,0,0);
+  const diff = (d - today) / 86400000;
+  if (diff < 0) return '#EF4444';
+  if (diff <= 2) return '#F59E0B';
+  return '#6B7280';
 }
 
-const PILLAR_COLORS = {
-  transformation: '#10B981', educational: '#3B82F6', experiment: '#F59E0B', 'grocery-meal': '#F97316',
-  'docu-series': '#8B5CF6', cooking: '#F97316', education: '#3B82F6', lifestyle: '#EC4899',
-  'trending-reactive': '#EF4444', vsl: '#EF4444', 'ugc-style': '#F59E0B', testimonial: '#10B981',
-  'direct-response': '#3B82F6', 'brand-awareness': '#8B5CF6',
-}
+/* ══════════════════════════════════════════════════════════
+   TASK DETAIL MODAL (embedded from PipelineBoard pattern)
+   ══════════════════════════════════════════════════════════ */
+function TaskDetailModal({ task, onClose, members, statuses, onUpdate }) {
+  const [subtasks, setSubtasks] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [localTask, setLocalTask] = useState(task);
+  const branchSlug = task.branch_slug;
 
-const STATUS_COLORS = {
-  'Idea Bank': '#6B7280', 'In Production': '#F59E0B', 'Rough Cut': '#3B82F6', 'Final Cut': '#8B5CF6',
-  'QC Review': '#EC4899', 'Revisions': '#EF4444', 'Thumbnail Ready': '#F97316', 'Publishing Queue': '#10B981',
-  'Published': '#37CA37', 'Posted / Archive': '#6366F1', 'Archived': '#9CA3AF',
-  'Backlog': '#6B7280', 'Script/Talking Points': '#F59E0B', 'Filming': '#3B82F6', 'Editing': '#8B5CF6',
-  'Ready to Post': '#10B981', 'Scheduled': '#37CA37',
-}
+  useEffect(() => {
+    setLocalTask(task);
+    loadSubtasks();
+    loadComments();
+  }, [task.id]);
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-
-function formatDate(d) {
-  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
-}
-
-function getWeekStart(date) {
-  const d = new Date(date)
-  d.setDate(d.getDate() - d.getDay())
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-function addDays(date, n) {
-  const d = new Date(date)
-  d.setDate(d.getDate() + n)
-  return d
-}
-
-// ── BACKLOG METER ──
-function BacklogMeter({ tasks }) {
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
-
-  const ytTasks = tasks.filter(t => t.branch_slug === 'youtube' && t.publish_date)
-  const sfTasks = tasks.filter(t => t.branch_slug === 'short-form' && t.publish_date)
-
-  const ytFuture = ytTasks.filter(t => new Date(t.publish_date + 'T00:00:00') >= now).sort((a, b) => new Date(a.publish_date) - new Date(b.publish_date))
-  const sfFuture = sfTasks.filter(t => new Date(t.publish_date + 'T00:00:00') >= now).sort((a, b) => new Date(a.publish_date) - new Date(b.publish_date))
-
-  const ytLastDate = ytFuture.length > 0 ? new Date(ytFuture[ytFuture.length - 1].publish_date + 'T00:00:00') : null
-  const sfLastDate = sfFuture.length > 0 ? new Date(sfFuture[sfFuture.length - 1].publish_date + 'T00:00:00') : null
-
-  const ytWeeks = ytLastDate ? Math.ceil((ytLastDate - now) / (7 * 24 * 60 * 60 * 1000)) : 0
-  const sfWeeks = sfLastDate ? Math.ceil((sfLastDate - now) / (7 * 24 * 60 * 60 * 1000)) : 0
-
-  const ytColor = ytWeeks >= 5 ? '#37CA37' : ytWeeks >= 3 ? '#F59E0B' : '#EF4444'
-  const sfColor = sfWeeks >= 5 ? '#37CA37' : sfWeeks >= 3 ? '#F59E0B' : '#EF4444'
-
-  return (
-    <div style={s.backlogRow}>
-      <div style={s.backlogCard}>
-        <div style={s.backlogHeader}>
-          <div style={{ ...s.backlogDot, background: BRANCH_COLORS.youtube.bg }} />
-          <span style={s.backlogTitle}>YouTube Backlog</span>
-        </div>
-        <div style={{ ...s.backlogNumber, color: ytColor }}>{ytWeeks} week{ytWeeks !== 1 ? 's' : ''}</div>
-        <div style={s.backlogSub}>{ytFuture.length} video{ytFuture.length !== 1 ? 's' : ''} scheduled</div>
-        <div style={s.backlogBar}>
-          <div style={{ ...s.backlogFill, width: Math.min(100, (ytWeeks / 10) * 100) + '%', background: ytColor }} />
-        </div>
-        <div style={s.backlogTarget}>Target: 5-10 weeks</div>
-      </div>
-      <div style={s.backlogCard}>
-        <div style={s.backlogHeader}>
-          <div style={{ ...s.backlogDot, background: BRANCH_COLORS['short-form'].bg }} />
-          <span style={s.backlogTitle}>Short Form Backlog</span>
-        </div>
-        <div style={{ ...s.backlogNumber, color: sfColor }}>{sfWeeks} week{sfWeeks !== 1 ? 's' : ''}</div>
-        <div style={s.backlogSub}>{sfFuture.length} post{sfFuture.length !== 1 ? 's' : ''} scheduled</div>
-        <div style={s.backlogBar}>
-          <div style={{ ...s.backlogFill, width: Math.min(100, (sfWeeks / 10) * 100) + '%', background: sfColor }} />
-        </div>
-        <div style={s.backlogTarget}>Target: 5-10 weeks</div>
-      </div>
-    </div>
-  )
-}
-
-// ── CALENDAR EVENT PILL ──
-function EventPill({ task, statuses, onClickTask }) {
-  const branch = BRANCH_COLORS[task.branch_slug] || BRANCH_COLORS.youtube
-  const statusName = statuses.find(st => st.id === task.status_id)?.name || ''
-  const statusColor = STATUS_COLORS[statusName] || '#6B7280'
-  const pillarColor = PILLAR_COLORS[task.content_pillar] || null
-  const talent = (task.talent || []).join(', ')
-  const platforms = (task.platform || []).map(p => p === 'Instagram Reels' ? 'IG' : p === 'TikTok' ? 'TT' : p === 'YouTube Shorts' ? 'YTS' : p).join(' ')
-  const isYT = task.branch_slug === 'youtube'
-  const isSF = task.branch_slug === 'short-form'
-
-  return (
-    <div onClick={() => onClickTask(task)} style={{ ...s.eventPill, background: branch.light, borderLeft: '3px solid ' + branch.bg, cursor: 'pointer' }} title={`${task.title}\nStatus: ${statusName}\nTalent: ${talent || 'TBD'}\nClick to open task`}>
-      <div style={s.eventTop}>
-        <span style={{ ...s.eventBranch, color: branch.bg }}>{branch.label}</span>
-        {task.is_sob && <span style={s.eventSOB}>SOB</span>}
-        <span style={{ ...s.eventStatus, background: statusColor + '20', color: statusColor }}>{statusName}</span>
-      </div>
-      <div style={s.eventTitle}>{task.title}</div>
-      <div style={s.eventMeta}>
-        {talent && <span style={s.eventTalent}>{talent}</span>}
-        {isSF && platforms && <span style={s.eventPlatforms}>{platforms}</span>}
-        {task.content_pillar && <span style={{ ...s.eventPillar, color: pillarColor || 'var(--text-muted)' }}>{task.content_pillar}</span>}
-      </div>
-      {(task.drive_folder_link || task.video_link) && <div style={s.eventLink}>📁 Drive</div>}
-    </div>
-  )
-}
-
-// ── MONTH VIEW ──
-function MonthView({ year, month, tasksByDate, statuses, onClickTask }) {
-  const firstDay = new Date(year, month, 1)
-  const lastDay = new Date(year, month + 1, 0)
-  const startOffset = firstDay.getDay()
-  const daysInMonth = lastDay.getDate()
-  const today = formatDate(new Date())
-
-  const weeks = []
-  let currentWeek = new Array(startOffset).fill(null)
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    currentWeek.push(day)
-    if (currentWeek.length === 7) {
-      weeks.push(currentWeek)
-      currentWeek = []
-    }
-  }
-  if (currentWeek.length > 0) {
-    while (currentWeek.length < 7) currentWeek.push(null)
-    weeks.push(currentWeek)
+  async function loadSubtasks() {
+    const { data } = await supabase
+      .from('pipeline_subtasks')
+      .select('*, assignee:profiles!pipeline_subtasks_assignee_id_fkey(id, full_name)')
+      .eq('task_id', task.id)
+      .order('sort_order');
+    if (data) setSubtasks(data);
   }
 
+  async function loadComments() {
+    const { data } = await supabase
+      .from('pipeline_comments')
+      .select('*, author:profiles!pipeline_comments_user_id_fkey(full_name)')
+      .eq('task_id', task.id)
+      .order('created_at', { ascending: false });
+    if (data) setComments(data);
+  }
+
+  async function updateField(field, value) {
+    const updated = { ...localTask, [field]: value };
+    setLocalTask(updated);
+    await supabase.from('pipeline_tasks').update({ [field]: value }).eq('id', task.id);
+    if (onUpdate) onUpdate(updated);
+  }
+
+  async function toggleSubtask(st) {
+    const done = !st.completed;
+    await supabase.from('pipeline_subtasks').update({
+      completed: done,
+      completed_at: done ? new Date().toISOString() : null,
+    }).eq('id', st.id);
+    loadSubtasks();
+  }
+
+  async function updateSubtaskAssignee(stId, userId) {
+    await supabase.from('pipeline_subtasks').update({
+      assignee_id: userId || null,
+    }).eq('id', stId);
+    loadSubtasks();
+  }
+
+  async function addComment() {
+    if (!newComment.trim()) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from('pipeline_comments').insert({
+      task_id: task.id,
+      user_id: user.id,
+      content: newComment.trim(),
+    });
+    setNewComment('');
+    loadComments();
+  }
+
+  const completed = subtasks.filter(s => s.completed).length;
+  const total = subtasks.length;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
   return (
-    <div style={s.monthGrid}>
-      <div style={s.monthHeaderRow}>
-        {DAYS.map(d => <div key={d} style={s.monthDayHeader}>{d}</div>)}
-      </div>
-      {weeks.map((week, wi) => (
-        <div key={wi} style={s.monthWeekRow}>
-          {week.map((day, di) => {
-            const dateStr = day ? formatDate(new Date(year, month, day)) : null
-            const isToday = dateStr === today
-            const events = dateStr ? (tasksByDate[dateStr] || []) : []
-            return (
-              <div key={di} style={{ ...s.monthCell, ...(isToday ? s.monthCellToday : {}), ...(day ? {} : { opacity: 0.3 }) }}>
-                {day && <div style={{ ...s.monthCellDay, ...(isToday ? { color: 'var(--green)', fontWeight: '700' } : {}) }}>{day}</div>}
-                <div style={s.monthCellEvents}>
-                  {events.slice(0, 3).map(t => (
-                    <EventPill key={t.id} task={t} statuses={statuses} onClickTask={onClickTask} />
-                  ))}
-                  {events.length > 3 && <div style={s.eventMore}>+{events.length - 3} more</div>}
-                </div>
-              </div>
-            )
-          })}
+    <div style={styles.modalOverlay} onClick={onClose}>
+      <div style={styles.modalContent} onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div style={styles.modalHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
+            <div style={{
+              width: 10, height: 10, borderRadius: '50%',
+              background: BRANCH_COLORS[branchSlug] || GREEN, flexShrink: 0,
+            }} />
+            <h2 style={styles.modalTitle}>{localTask.title}</h2>
+          </div>
+          <button onClick={onClose} style={styles.closeBtn}>&times;</button>
         </div>
-      ))}
-    </div>
-  )
-}
 
-// ── WEEK VIEW ──
-function WeekView({ weekStart, tasksByDate, statuses, onClickTask }) {
-  const today = formatDate(new Date())
-  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+        {/* Top bar -- status, assignee, priority, due, publish */}
+        <div style={styles.topBar}>
+          <div style={styles.topBarItem}>
+            <span style={styles.topBarLabel}>Status</span>
+            <select
+              value={localTask.status_id || ''}
+              onChange={e => updateField('status_id', e.target.value)}
+              style={styles.topBarSelect}
+            >
+              {statuses.filter(s => s.branch_slug === branchSlug).map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+          <div style={styles.topBarItem}>
+            <span style={styles.topBarLabel}>Assignee</span>
+            <select
+              value={localTask.assignee_id || ''}
+              onChange={e => updateField('assignee_id', e.target.value || null)}
+              style={styles.topBarSelect}
+            >
+              <option value="">Unassigned</option>
+              {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+            </select>
+          </div>
+          <div style={styles.topBarItem}>
+            <span style={styles.topBarLabel}>Priority</span>
+            <select
+              value={localTask.priority || ''}
+              onChange={e => updateField('priority', e.target.value || null)}
+              style={{ ...styles.topBarSelect, color: PRIORITY_COLORS[localTask.priority] || WHITE }}
+            >
+              <option value="">None</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div style={styles.topBarItem}>
+            <span style={styles.topBarLabel}>Due Date</span>
+            <input
+              type="date"
+              value={localTask.due_date || ''}
+              onChange={e => updateField('due_date', e.target.value || null)}
+              style={{ ...styles.topBarSelect, color: dueColor(localTask.due_date) }}
+            />
+          </div>
+          <div style={styles.topBarItem}>
+            <span style={styles.topBarLabel}>Publish</span>
+            <input
+              type="date"
+              value={localTask.publish_date || ''}
+              onChange={e => updateField('publish_date', e.target.value || null)}
+              style={styles.topBarSelect}
+            />
+          </div>
+        </div>
 
-  return (
-    <div style={s.weekGrid}>
-      {days.map(day => {
-        const dateStr = formatDate(day)
-        const isToday = dateStr === today
-        const events = tasksByDate[dateStr] || []
-        const dayLabel = day.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-        return (
-          <div key={dateStr} style={{ ...s.weekColumn, ...(isToday ? s.weekColumnToday : {}) }}>
-            <div style={{ ...s.weekDayHeader, ...(isToday ? { color: 'var(--green)', fontWeight: '700' } : {}) }}>
-              {dayLabel}
+        {/* Body -- two columns */}
+        <div style={styles.modalBody}>
+          {/* Left -- description, subtasks, comments */}
+          <div style={styles.modalLeft}>
+            {/* Description */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>Description</h3>
+              <textarea
+                value={localTask.description || ''}
+                onChange={e => setLocalTask({ ...localTask, description: e.target.value })}
+                onBlur={e => updateField('description', e.target.value)}
+                placeholder="Add a description..."
+                style={styles.textarea}
+                rows={3}
+              />
             </div>
-            <div style={s.weekEvents}>
-              {events.map(t => <EventPill key={t.id} task={t} statuses={statuses} onClickTask={onClickTask} />)}
-              {events.length === 0 && <div style={s.weekEmpty}>No content</div>}
+
+            {/* Subtasks */}
+            <div style={styles.section}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <h3 style={styles.sectionTitle}>Subtasks</h3>
+                <span style={{ fontSize: 12, color: '#9CA3AF' }}>
+                  {completed}/{total} ({pct}%)
+                </span>
+              </div>
+              {/* Progress bar */}
+              <div style={{ height: 4, background: BORDER, borderRadius: 2, marginBottom: 12 }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: GREEN, borderRadius: 2, transition: 'width 0.3s' }} />
+              </div>
+              {subtasks.map(st => {
+                const stColor = (st.color && st.color !== '#6B7280')
+                  ? st.color
+                  : SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280';
+                return (
+                  <div key={st.id} style={styles.subtaskRow}>
+                    <div
+                      style={{
+                        ...styles.subtaskDot,
+                        background: stColor,
+                        opacity: st.completed ? 0.4 : 1,
+                      }}
+                    />
+                    <input
+                      type="checkbox"
+                      checked={st.completed}
+                      onChange={() => toggleSubtask(st)}
+                      style={{ accentColor: GREEN, cursor: 'pointer' }}
+                    />
+                    <span style={{
+                      flex: 1, fontSize: 13, color: st.completed ? '#6B7280' : WHITE,
+                      textDecoration: st.completed ? 'line-through' : 'none',
+                    }}>
+                      {st.title}
+                    </span>
+                    <select
+                      value={st.assignee_id || st.assignee?.id || ''}
+                      onChange={e => updateSubtaskAssignee(st.id, e.target.value)}
+                      style={styles.subtaskAssignee}
+                    >
+                      <option value="">--</option>
+                      {members.map(m => (
+                        <option key={m.id} value={m.id}>{m.full_name}</option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Comments */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>Activity</h3>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                <input
+                  value={newComment}
+                  onChange={e => setNewComment(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && addComment()}
+                  placeholder="Add a comment..."
+                  style={styles.commentInput}
+                />
+                <button onClick={addComment} style={styles.commentBtn}>Post</button>
+              </div>
+              {comments.map(c => (
+                <div key={c.id} style={styles.commentItem}>
+                  <span style={{ fontWeight: 600, color: GREEN, fontSize: 12 }}>
+                    {c.author?.full_name || 'Unknown'}
+                  </span>
+                  <span style={{ fontSize: 11, color: '#6B7280', marginLeft: 8 }}>
+                    {new Date(c.created_at).toLocaleString()}
+                  </span>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#D1D5DB' }}>{c.content}</p>
+                </div>
+              ))}
             </div>
           </div>
-        )
-      })}
+
+          {/* Right sidebar -- branch fields + links */}
+          <div style={styles.modalRight}>
+            {/* Branch-specific fields */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>{BRANCH_LABELS[branchSlug]} Fields</h3>
+
+              {/* Common fields */}
+              <FieldRow label="Content Pillar">
+                <select value={localTask.content_pillar || ''} onChange={e => updateField('content_pillar', e.target.value || null)} style={styles.fieldSelect}>
+                  <option value="">None</option>
+                  <option value="transformation">Transformation</option>
+                  <option value="education">Education</option>
+                  <option value="grocery">Grocery Haul</option>
+                  <option value="challenge">Challenge</option>
+                  <option value="experiment">Experiment</option>
+                </select>
+              </FieldRow>
+
+              {(branchSlug === 'youtube' || branchSlug === 'short-form') && (
+                <FieldRow label="Talent">
+                  <input
+                    value={(localTask.talent || []).join(', ')}
+                    onChange={e => updateField('talent', e.target.value ? e.target.value.split(',').map(t => t.trim()) : [])}
+                    placeholder="Jacob, Ryan Snow"
+                    style={styles.fieldInput}
+                  />
+                </FieldRow>
+              )}
+
+              <FieldRow label="Editor Assigned">
+                <input
+                  value={localTask.editor_assigned || ''}
+                  onChange={e => updateField('editor_assigned', e.target.value || null)}
+                  placeholder="Editor name"
+                  style={styles.fieldInput}
+                />
+              </FieldRow>
+
+              {branchSlug === 'youtube' && (
+                <>
+                  <FieldRow label="Content Tier">
+                    <select value={localTask.content_tier || ''} onChange={e => updateField('content_tier', e.target.value || null)} style={styles.fieldSelect}>
+                      <option value="">None</option>
+                      <option value="flagship">Flagship</option>
+                      <option value="standard">Standard</option>
+                      <option value="quick-turn">Quick Turn</option>
+                    </select>
+                  </FieldRow>
+                  <FieldRow label="Thumbnail Status">
+                    <select value={localTask.thumbnail_status || ''} onChange={e => updateField('thumbnail_status', e.target.value || null)} style={styles.fieldSelect}>
+                      <option value="">None</option>
+                      <option value="not-started">Not Started</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="ready">Ready</option>
+                      <option value="approved">Approved</option>
+                    </select>
+                  </FieldRow>
+                  <FieldRow label="QC Score">
+                    <input type="number" min={0} max={100} value={localTask.qc_score || ''} onChange={e => updateField('qc_score', e.target.value ? parseInt(e.target.value) : null)} placeholder="0-100" style={styles.fieldInput} />
+                  </FieldRow>
+                </>
+              )}
+
+              {branchSlug === 'short-form' && (
+                <>
+                  <FieldRow label="Platform">
+                    <input
+                      value={(localTask.platform || []).join(', ')}
+                      onChange={e => updateField('platform', e.target.value ? e.target.value.split(',').map(t => t.trim()) : [])}
+                      placeholder="IG, TikTok, YT Shorts"
+                      style={styles.fieldInput}
+                    />
+                  </FieldRow>
+                  <FieldRow label="SOB">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={localTask.is_sob || false}
+                        onChange={e => updateField('is_sob', e.target.checked)}
+                        style={{ accentColor: PEACH }}
+                      />
+                      <span style={{ fontSize: 12, color: '#9CA3AF' }}>Sold-Out Broadcast</span>
+                    </label>
+                  </FieldRow>
+                </>
+              )}
+
+              {branchSlug === 'ads-creative' && (
+                <FieldRow label="First Pass">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={localTask.first_pass || false}
+                      onChange={e => updateField('first_pass', e.target.checked)}
+                      style={{ accentColor: GREEN }}
+                    />
+                    <span style={{ fontSize: 12, color: '#9CA3AF' }}>First pass complete</span>
+                  </label>
+                </FieldRow>
+              )}
+            </div>
+
+            {/* Links */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>Links</h3>
+              <FieldRow label="Script">
+                <input value={localTask.script_link || ''} onChange={e => updateField('script_link', e.target.value || null)} placeholder="Google Doc URL" style={styles.fieldInput} />
+              </FieldRow>
+              <FieldRow label="Drive Folder">
+                <input value={localTask.drive_folder_link || ''} onChange={e => updateField('drive_folder_link', e.target.value || null)} placeholder="Drive folder URL" style={styles.fieldInput} />
+              </FieldRow>
+              <FieldRow label="Video Link">
+                <input value={localTask.video_link || ''} onChange={e => updateField('video_link', e.target.value || null)} placeholder="YouTube URL" style={styles.fieldInput} />
+              </FieldRow>
+              {/* Quick open links */}
+              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                {localTask.script_link && (
+                  <a href={localTask.script_link} target="_blank" rel="noopener" style={styles.linkPill}>Script ↗</a>
+                )}
+                {localTask.drive_folder_link && (
+                  <a href={localTask.drive_folder_link} target="_blank" rel="noopener" style={styles.linkPill}>Drive ↗</a>
+                )}
+                {localTask.video_link && (
+                  <a href={localTask.video_link} target="_blank" rel="noopener" style={styles.linkPill}>Video ↗</a>
+                )}
+              </div>
+            </div>
+
+            {/* Backlog week */}
+            <div style={styles.section}>
+              <FieldRow label="Backlog Week">
+                <input type="number" min={1} value={localTask.backlog_week || ''} onChange={e => updateField('backlog_week', e.target.value ? parseInt(e.target.value) : null)} placeholder="Week #" style={styles.fieldInput} />
+              </FieldRow>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
 
-// ── MAIN CALENDAR ──
+function FieldRow({ label, children }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: `1px solid ${BORDER}` }}>
+      <span style={{ fontSize: 12, color: '#9CA3AF', minWidth: 100 }}>{label}</span>
+      <div style={{ flex: 1, maxWidth: 180 }}>{children}</div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   CONTENT CALENDAR
+   ══════════════════════════════════════════════════════════ */
 export default function ContentCalendar() {
-  const navigate = useNavigate()
-  const [tasks, setTasks] = useState([])
-  const [statuses, setStatuses] = useState([])
-  const [view, setView] = useState('month')
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [branchFilter, setBranchFilter] = useState('all')
-  const [loading, setLoading] = useState(true)
+  const [tasks, setTasks] = useState([]);
+  const [statuses, setStatuses] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [curDate, setCurDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState('month');
+  const [branchFilter, setBranchFilter] = useState('all');
+  const [selectedTask, setSelectedTask] = useState(null);
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => { load(); }, []);
 
-  async function fetchData() {
-    setLoading(true)
-    const [tasksRes, statusRes] = await Promise.all([
-      supabase.from('pipeline_tasks').select('*').not('publish_date', 'is', null).order('publish_date'),
-      supabase.from('pipeline_statuses').select('*'),
-    ])
-    setTasks(tasksRes.data || [])
-    setStatuses(statusRes.data || [])
-    setLoading(false)
+  async function load() {
+    const [tRes, sRes, mRes] = await Promise.all([
+      supabase.from('pipeline_tasks').select('*, status:pipeline_statuses(name, branch_slug)'),
+      supabase.from('pipeline_statuses').select('*').order('sort_order'),
+      supabase.from('profiles').select('id, full_name'),
+    ]);
+    if (tRes.data) setTasks(tRes.data);
+    if (sRes.data) setStatuses(sRes.data);
+    if (mRes.data) setMembers(mRes.data);
   }
 
-  function handleClickTask(task) {
-    navigate(`/branch/${task.branch_slug}/pipeline`)
+  /* Backlog depth */
+  const backlogDepth = useMemo(() => {
+    const now = new Date();
+    const calc = (slug) => {
+      const published = statuses.filter(s => s.branch_slug === slug && /published|posted|archived/i.test(s.name)).map(s => s.id);
+      const upcoming = tasks.filter(t =>
+        t.branch_slug === slug &&
+        !published.includes(t.status_id) &&
+        t.publish_date &&
+        parseLocal(t.publish_date) >= now
+      );
+      if (slug === 'youtube') {
+        return Math.round(upcoming.length / 2);
+      }
+      return Math.round(upcoming.length / 7);
+    };
+    return { youtube: calc('youtube'), shortForm: calc('short-form') };
+  }, [tasks, statuses]);
+
+  function backlogColor(weeks) {
+    if (weeks < 3) return '#EF4444';
+    if (weeks <= 5) return '#F59E0B';
+    return '#10B981';
   }
 
-  const filtered = branchFilter === 'all' ? tasks : tasks.filter(t => t.branch_slug === branchFilter)
+  /* Calendar grid */
+  const year = curDate.getFullYear();
+  const month = curDate.getMonth();
+
+  const monthDays = useMemo(() => {
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    const startPad = first.getDay();
+    const days = [];
+    for (let i = startPad - 1; i >= 0; i--) {
+      const d = new Date(year, month, -i);
+      days.push({ date: d, inMonth: false });
+    }
+    for (let i = 1; i <= last.getDate(); i++) {
+      days.push({ date: new Date(year, month, i), inMonth: true });
+    }
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({ date: new Date(year, month + 1, i), inMonth: false });
+    }
+    return days;
+  }, [year, month]);
+
+  const weekDays = useMemo(() => {
+    const start = new Date(curDate);
+    start.setDate(start.getDate() - start.getDay());
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      return { date: d, inMonth: true };
+    });
+  }, [curDate]);
+
+  const displayDays = viewMode === 'month' ? monthDays : weekDays;
 
   const tasksByDate = useMemo(() => {
-    const map = {}
-    filtered.forEach(t => {
-      if (!t.publish_date) return
-      if (!map[t.publish_date]) map[t.publish_date] = []
-      map[t.publish_date].push(t)
-    })
-    return map
-  }, [filtered])
+    const map = {};
+    tasks.forEach(t => {
+      const dateStr = t.publish_date || t.due_date;
+      if (!dateStr) return;
+      if (branchFilter !== 'all' && t.branch_slug !== branchFilter) return;
+      if (!map[dateStr]) map[dateStr] = [];
+      map[dateStr].push(t);
+    });
+    return map;
+  }, [tasks, branchFilter]);
 
-  const year = currentDate.getFullYear()
-  const month = currentDate.getMonth()
-  const weekStart = getWeekStart(currentDate)
-
-  function prevPeriod() {
-    if (view === 'month') setCurrentDate(new Date(year, month - 1, 1))
-    else setCurrentDate(addDays(weekStart, -7))
+  function nav(dir) {
+    const d = new Date(curDate);
+    if (viewMode === 'month') d.setMonth(d.getMonth() + dir);
+    else d.setDate(d.getDate() + dir * 7);
+    setCurDate(d);
   }
-  function nextPeriod() {
-    if (view === 'month') setCurrentDate(new Date(year, month + 1, 1))
-    else setCurrentDate(addDays(weekStart, 7))
+
+  function handleTaskUpdate(updated) {
+    setTasks(prev => prev.map(t => t.id === updated.id ? { ...t, ...updated } : t));
+    setSelectedTask(prev => prev && prev.id === updated.id ? { ...prev, ...updated } : prev);
   }
-  function goToday() { setCurrentDate(new Date()) }
 
-  const periodLabel = view === 'month'
-    ? `${MONTHS[month]} ${year}`
-    : `Week of ${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} -- ${addDays(weekStart, 6).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-
-  if (loading) return <div style={{ color: 'var(--text-muted)', padding: '40px' }}>Loading calendar...</div>
+  const today = new Date();
 
   return (
-    <div>
-      <div style={s.headerRow}>
-        <div>
-          <h1 style={s.pageTitle}>Content Calendar</h1>
-          <p style={s.pageDesc}>Publishing schedule across all branches -- see your backlog depth at a glance</p>
+    <div style={{ padding: '24px 32px', maxWidth: 1200, margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: WHITE, fontFamily: 'Outfit, Arial, sans-serif' }}>
+          Content Calendar
+        </h1>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {/* Backlog meters */}
+          <div style={styles.backlogMeter}>
+            <span style={{ fontSize: 11, color: '#9CA3AF' }}>YT Backlog</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: backlogColor(backlogDepth.youtube) }}>
+              {backlogDepth.youtube}w
+            </span>
+          </div>
+          <div style={styles.backlogMeter}>
+            <span style={{ fontSize: 11, color: '#9CA3AF' }}>SF Backlog</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: backlogColor(backlogDepth.shortForm) }}>
+              {backlogDepth.shortForm}w
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Backlog meters */}
-      <BacklogMeter tasks={tasks} />
-
-      {/* Toolbar */}
-      <div style={s.toolbar}>
-        <div style={s.toolbarLeft}>
-          <button onClick={prevPeriod} style={s.navBtn}>◀</button>
-          <button onClick={goToday} style={s.todayBtn}>Today</button>
-          <button onClick={nextPeriod} style={s.navBtn}>▶</button>
-          <span style={s.periodLabel}>{periodLabel}</span>
+      {/* Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => nav(-1)} style={styles.navBtn}>&larr;</button>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: WHITE, minWidth: 200, textAlign: 'center' }}>
+            {viewMode === 'month'
+              ? `${MONTHS[month]} ${year}`
+              : `Week of ${weekDays[0].date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+            }
+          </h2>
+          <button onClick={() => nav(1)} style={styles.navBtn}>&rarr;</button>
+          <button onClick={() => setCurDate(new Date())} style={styles.todayBtn}>Today</button>
         </div>
-        <div style={s.toolbarRight}>
-          <div style={s.filterGroup}>
-            {['all', 'youtube', 'short-form', 'ads-creative', 'production'].map(f => (
-              <button key={f} onClick={() => setBranchFilter(f)} style={{ ...s.filterBtn, ...(branchFilter === f ? s.filterBtnActive : {}), ...(f !== 'all' && branchFilter === f ? { background: BRANCH_COLORS[f]?.light, color: BRANCH_COLORS[f]?.bg, borderColor: BRANCH_COLORS[f]?.border } : {}) }}>
-                {f === 'all' ? 'All' : BRANCH_COLORS[f]?.label || f}
+
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {/* View toggle */}
+          <div style={styles.toggleGroup}>
+            <button onClick={() => setViewMode('month')} style={{ ...styles.toggleBtn, ...(viewMode === 'month' ? styles.toggleActive : {}) }}>Month</button>
+            <button onClick={() => setViewMode('week')} style={{ ...styles.toggleBtn, ...(viewMode === 'week' ? styles.toggleActive : {}) }}>Week</button>
+          </div>
+          {/* Branch filters */}
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button onClick={() => setBranchFilter('all')} style={{ ...styles.filterBtn, ...(branchFilter === 'all' ? { background: '#374151', color: WHITE } : {}) }}>All</button>
+            {Object.entries(BRANCH_LABELS).map(([slug, label]) => (
+              <button
+                key={slug}
+                onClick={() => setBranchFilter(slug)}
+                style={{
+                  ...styles.filterBtn,
+                  ...(branchFilter === slug ? { background: BRANCH_COLORS[slug] + '33', color: BRANCH_COLORS[slug], borderColor: BRANCH_COLORS[slug] } : {}),
+                }}
+              >
+                {label}
               </button>
             ))}
           </div>
-          <div style={s.viewToggle}>
-            <button onClick={() => setView('month')} style={{ ...s.viewBtn, ...(view === 'month' ? s.viewBtnActive : {}) }}>Month</button>
-            <button onClick={() => setView('week')} style={{ ...s.viewBtn, ...(view === 'week' ? s.viewBtnActive : {}) }}>Week</button>
-          </div>
         </div>
       </div>
 
-      {/* Calendar */}
-      {view === 'month'
-        ? <MonthView year={year} month={month} tasksByDate={tasksByDate} statuses={statuses} onClickTask={handleClickTask} />
-        : <WeekView weekStart={weekStart} tasksByDate={tasksByDate} statuses={statuses} onClickTask={handleClickTask} />
-      }
+      {/* Calendar grid */}
+      <div style={{ background: CARD, borderRadius: 12, border: `1px solid ${BORDER}`, overflow: 'hidden' }}>
+        {/* Day headers */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: `1px solid ${BORDER}` }}>
+          {DAYS.map(d => (
+            <div key={d} style={{ padding: '10px 8px', fontSize: 12, fontWeight: 600, color: '#9CA3AF', textAlign: 'center' }}>
+              {d}
+            </div>
+          ))}
+        </div>
+        {/* Day cells */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+          {displayDays.map(({ date, inMonth }, i) => {
+            const dateStr = fmt(date);
+            const dayTasks = tasksByDate[dateStr] || [];
+            const isToday = sameDay(date, today);
+            return (
+              <div
+                key={i}
+                style={{
+                  minHeight: viewMode === 'month' ? 100 : 300,
+                  padding: 6,
+                  borderRight: (i + 1) % 7 !== 0 ? `1px solid ${BORDER}` : 'none',
+                  borderBottom: `1px solid ${BORDER}`,
+                  background: isToday ? GREEN + '0D' : 'transparent',
+                  opacity: inMonth ? 1 : 0.35,
+                }}
+              >
+                <div style={{
+                  fontSize: 12, fontWeight: isToday ? 700 : 400,
+                  color: isToday ? GREEN : '#9CA3AF',
+                  marginBottom: 4, textAlign: 'right', paddingRight: 4,
+                }}>
+                  {date.getDate()}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {dayTasks.slice(0, viewMode === 'month' ? 4 : 20).map(t => (
+                    <button
+                      key={t.id}
+                      onClick={() => setSelectedTask(t)}
+                      style={{
+                        ...styles.eventPill,
+                        background: (BRANCH_COLORS[t.branch_slug] || GREEN) + '22',
+                        borderLeft: `3px solid ${BRANCH_COLORS[t.branch_slug] || GREEN}`,
+                      }}
+                    >
+                      <span style={{ fontSize: 11, fontWeight: 500, color: WHITE, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {t.title}
+                      </span>
+                      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                        {t.is_sob && <span style={{ fontSize: 9, background: PEACH + '33', color: PEACH, padding: '1px 4px', borderRadius: 3, fontWeight: 600 }}>SOB</span>}
+                        {t.drive_folder_link && <span style={{ fontSize: 9, color: '#6B7280' }}>📁</span>}
+                      </div>
+                    </button>
+                  ))}
+                  {dayTasks.length > (viewMode === 'month' ? 4 : 20) && (
+                    <span style={{ fontSize: 10, color: '#6B7280', paddingLeft: 6 }}>
+                      +{dayTasks.length - (viewMode === 'month' ? 4 : 20)} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Task Detail Modal */}
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          members={members}
+          statuses={statuses}
+          onUpdate={handleTaskUpdate}
+        />
+      )}
     </div>
-  )
+  );
 }
 
-// ── STYLES ──
-const s = {
-  headerRow: { marginBottom: '24px' },
-  pageTitle: { fontSize: '24px', fontWeight: '700', color: 'var(--white)', marginBottom: '4px' },
-  pageDesc: { fontSize: '13px', color: 'var(--text-muted)' },
+/* ── styles ── */
+const styles = {
+  /* Calendar */
+  navBtn: { background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 6, color: WHITE, padding: '6px 12px', cursor: 'pointer', fontSize: 16 },
+  todayBtn: { background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 6, color: GREEN, padding: '6px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600 },
+  toggleGroup: { display: 'flex', background: CARD_LIGHT, borderRadius: 6, border: `1px solid ${BORDER}`, overflow: 'hidden' },
+  toggleBtn: { background: 'transparent', border: 'none', color: '#9CA3AF', padding: '6px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 500 },
+  toggleActive: { background: GREEN + '22', color: GREEN },
+  filterBtn: { background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 6, color: '#9CA3AF', padding: '4px 10px', cursor: 'pointer', fontSize: 11, fontWeight: 500 },
+  backlogMeter: { display: 'flex', flexDirection: 'column', alignItems: 'center', background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: '6px 14px', minWidth: 80 },
+  eventPill: {
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4,
+    padding: '3px 6px', borderRadius: 4, cursor: 'pointer', textAlign: 'left',
+    background: 'transparent', border: 'none', width: '100%',
+    transition: 'opacity 0.15s',
+  },
 
-  // Backlog meters
-  backlogRow: { display: 'flex', gap: '16px', marginBottom: '24px' },
-  backlogCard: { flex: 1, padding: '20px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '12px' },
-  backlogHeader: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' },
-  backlogDot: { width: '10px', height: '10px', borderRadius: '50%' },
-  backlogTitle: { fontSize: '13px', fontWeight: '600', color: 'var(--text-secondary)' },
-  backlogNumber: { fontSize: '32px', fontWeight: '700', lineHeight: '1.1', marginBottom: '2px' },
-  backlogSub: { fontSize: '12px', color: 'var(--text-muted)', marginBottom: '10px' },
-  backlogBar: { height: '6px', background: 'var(--dark-border)', borderRadius: '3px', overflow: 'hidden', marginBottom: '6px' },
-  backlogFill: { height: '100%', borderRadius: '3px', transition: 'width 0.3s' },
-  backlogTarget: { fontSize: '11px', color: 'var(--text-muted)' },
-
-  // Toolbar
-  toolbar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' },
-  toolbarLeft: { display: 'flex', alignItems: 'center', gap: '8px' },
-  toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px' },
-  navBtn: { width: '32px', height: '32px', borderRadius: '8px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', color: 'var(--text-secondary)', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  todayBtn: { padding: '6px 14px', borderRadius: '8px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', color: 'var(--text-secondary)', fontSize: '12px', fontWeight: '500', cursor: 'pointer' },
-  periodLabel: { fontSize: '16px', fontWeight: '600', color: 'var(--white)', marginLeft: '8px' },
-  filterGroup: { display: 'flex', gap: '4px' },
-  filterBtn: { padding: '5px 12px', borderRadius: '6px', background: 'transparent', border: '1px solid var(--dark-border)', color: 'var(--text-muted)', fontSize: '12px', fontWeight: '500', cursor: 'pointer' },
-  filterBtnActive: { background: 'rgba(255,255,255,0.06)', color: 'var(--white)', borderColor: 'rgba(255,255,255,0.15)' },
-  viewToggle: { display: 'flex', background: 'var(--dark-card)', borderRadius: '8px', border: '1px solid var(--dark-border)', overflow: 'hidden' },
-  viewBtn: { padding: '6px 14px', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '12px', fontWeight: '500', cursor: 'pointer' },
-  viewBtnActive: { background: 'rgba(255,255,255,0.08)', color: 'var(--white)' },
-
-  // Month view
-  monthGrid: { background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '12px', overflow: 'hidden' },
-  monthHeaderRow: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid var(--dark-border)' },
-  monthDayHeader: { padding: '10px', fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', textAlign: 'center', letterSpacing: '0.5px' },
-  monthWeekRow: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: '1px solid var(--dark-border)' },
-  monthCell: { minHeight: '120px', padding: '6px', borderRight: '1px solid var(--dark-border)', display: 'flex', flexDirection: 'column' },
-  monthCellToday: { background: 'rgba(55,202,55,0.04)' },
-  monthCellDay: { fontSize: '12px', fontWeight: '500', color: 'var(--text-secondary)', marginBottom: '4px', textAlign: 'right', padding: '2px 4px' },
-  monthCellEvents: { display: 'flex', flexDirection: 'column', gap: '3px', flex: 1, overflow: 'hidden' },
-  eventMore: { fontSize: '10px', color: 'var(--text-muted)', textAlign: 'center', padding: '2px' },
-
-  // Week view
-  weekGrid: { display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', minHeight: 'calc(100vh - 400px)' },
-  weekColumn: { background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '10px', padding: '10px', display: 'flex', flexDirection: 'column' },
-  weekColumnToday: { borderColor: 'rgba(55,202,55,0.3)', background: 'rgba(55,202,55,0.03)' },
-  weekDayHeader: { fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '10px', textAlign: 'center', padding: '4px 0', borderBottom: '1px solid var(--dark-border)' },
-  weekEvents: { display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 },
-  weekEmpty: { fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center', padding: '16px 0', opacity: 0.5 },
-
-  // Event pill
-  eventPill: { padding: '6px 8px', borderRadius: '6px', cursor: 'default', overflow: 'hidden' },
-  eventTop: { display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' },
-  eventBranch: { fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.3px' },
-  eventStatus: { fontSize: '9px', fontWeight: '600', padding: '1px 5px', borderRadius: '3px', marginLeft: 'auto' },
-  eventTitle: { fontSize: '11px', fontWeight: '600', color: 'var(--white)', lineHeight: '1.3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  eventMeta: { display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '2px' },
-  eventTalent: { fontSize: '9px', color: 'var(--text-muted)' },
-  eventPlatforms: { fontSize: '9px', color: 'var(--peach)', fontWeight: '600' },
-  eventPillar: { fontSize: '9px', fontWeight: '500' },
-  eventSOB: { fontSize: '8px', fontWeight: '700', padding: '1px 5px', borderRadius: '3px', background: 'rgba(244,171,156,0.2)', color: '#F4AB9C', letterSpacing: '0.3px' },
-  eventLink: { fontSize: '9px', color: 'var(--green)', marginTop: '2px', opacity: 0.7 },
-}
+  /* Modal */
+  modalOverlay: {
+    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000,
+    display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+    paddingTop: 40, overflowY: 'auto',
+  },
+  modalContent: {
+    background: BG, border: `1px solid ${BORDER}`, borderRadius: 12,
+    width: '90%', maxWidth: 960, maxHeight: 'calc(100vh - 80px)',
+    overflowY: 'auto', boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
+  },
+  modalHeader: {
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    padding: '16px 20px', borderBottom: `1px solid ${BORDER}`,
+  },
+  modalTitle: { fontSize: 18, fontWeight: 700, color: WHITE, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  closeBtn: { background: 'transparent', border: 'none', color: '#9CA3AF', fontSize: 24, cursor: 'pointer', padding: '4px 8px', lineHeight: 1 },
+  topBar: {
+    display: 'flex', gap: 12, padding: '12px 20px', borderBottom: `1px solid ${BORDER}`,
+    flexWrap: 'wrap', background: CARD,
+  },
+  topBarItem: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 120 },
+  topBarLabel: { fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  topBarSelect: {
+    background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 4,
+    color: WHITE, padding: '4px 8px', fontSize: 12, outline: 'none',
+  },
+  modalBody: { display: 'flex', gap: 0, minHeight: 400 },
+  modalLeft: { flex: 1, padding: 20, borderRight: `1px solid ${BORDER}`, overflowY: 'auto', maxHeight: 'calc(100vh - 240px)' },
+  modalRight: { width: 300, padding: 20, overflowY: 'auto', maxHeight: 'calc(100vh - 240px)' },
+  section: { marginBottom: 20 },
+  sectionTitle: { fontSize: 13, fontWeight: 600, color: '#9CA3AF', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  textarea: {
+    width: '100%', background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 6,
+    color: WHITE, padding: 10, fontSize: 13, outline: 'none', resize: 'vertical',
+    fontFamily: 'Outfit, Arial, sans-serif',
+  },
+  subtaskRow: { display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: `1px solid ${BORDER}22` },
+  subtaskDot: { width: 8, height: 8, borderRadius: '50%', flexShrink: 0 },
+  subtaskAssignee: {
+    background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 4,
+    color: '#9CA3AF', padding: '2px 4px', fontSize: 11, outline: 'none', maxWidth: 120,
+  },
+  commentInput: {
+    flex: 1, background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 6,
+    color: WHITE, padding: '8px 10px', fontSize: 13, outline: 'none',
+    fontFamily: 'Outfit, Arial, sans-serif',
+  },
+  commentBtn: {
+    background: GREEN, border: 'none', borderRadius: 6, color: '#000',
+    padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+  },
+  commentItem: { padding: '8px 0', borderBottom: `1px solid ${BORDER}22` },
+  fieldSelect: {
+    width: '100%', background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 4,
+    color: WHITE, padding: '4px 6px', fontSize: 12, outline: 'none',
+  },
+  fieldInput: {
+    width: '100%', background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 4,
+    color: WHITE, padding: '4px 6px', fontSize: 12, outline: 'none',
+    fontFamily: 'Outfit, Arial, sans-serif',
+  },
+  linkPill: {
+    display: 'inline-block', background: GREEN + '15', color: GREEN, border: `1px solid ${GREEN}33`,
+    borderRadius: 4, padding: '3px 8px', fontSize: 11, fontWeight: 600,
+    textDecoration: 'none', cursor: 'pointer',
+  },
+};
