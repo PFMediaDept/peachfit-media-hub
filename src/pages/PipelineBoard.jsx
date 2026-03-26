@@ -275,7 +275,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
                         title={stAssignee ? stAssignee.full_name : 'Assign'}
                       >
                         <option value="">--</option>
-                        {members.map(m => <option key={m.id} value={m.id}>{getInitials(m.full_name)}</option>)}
+                        {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
                       </select>
                     </div>
                   )
