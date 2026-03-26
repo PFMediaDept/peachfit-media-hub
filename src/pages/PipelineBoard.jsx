@@ -23,7 +23,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
   }
 
   async function fetchComments() {
-    const { data } = await supabase.from('pipeline_comments').select('*, profiles(full_name)').eq('task_id', task.id).order('created_at', { ascending: false })
+    const { data } = await supabase.from('pipeline_comments').select('*').eq('task_id', task.id).order('created_at', { ascending: false })
     setComments(data || [])
   }
 
@@ -378,7 +378,7 @@ export default function PipelineBoard() {
   }
 
   async function fetchTasks() {
-    const { data } = await supabase.from('pipeline_tasks').select('*, profiles(full_name)').eq('branch_slug', slug).order('sort_order')
+    const { data } = await supabase.from('pipeline_tasks').select('*').eq('branch_slug', slug).order('sort_order')
     setTasks(data || [])
   }
 
