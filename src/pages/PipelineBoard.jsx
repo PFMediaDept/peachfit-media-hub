@@ -203,10 +203,46 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
   return (
     <div style={modal.overlay} onClick={onClose}>
       <div style={modal.container} onClick={e => e.stopPropagation()}>
+        {/* Title bar */}
         <div style={modal.header}>
           <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} style={modal.titleInput} />
           <button onClick={onClose} style={modal.closeBtn}>✕</button>
         </div>
+
+        {/* ClickUp-style top bar: Status, Assignee, Priority, Dates */}
+        <div style={modal.topBar}>
+          <div style={modal.topBarItem}>
+            <span style={modal.topBarLabel}>Status</span>
+            <select value={form.status_id || ''} onChange={e => setForm(p => ({ ...p, status_id: e.target.value }))} style={{ ...modal.topBarSelect, background: (statuses.find(s => s.id === form.status_id)?.color || '#6B7280') + '25', color: statuses.find(s => s.id === form.status_id)?.color || '#6B7280', borderColor: (statuses.find(s => s.id === form.status_id)?.color || '#6B7280') + '50' }}>
+              {statuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+          <div style={modal.topBarItem}>
+            <span style={modal.topBarLabel}>Assignee</span>
+            <select value={form.assignee_id || ''} onChange={e => setForm(p => ({ ...p, assignee_id: e.target.value || null }))} style={modal.topBarSelect}>
+              <option value="">Unassigned</option>
+              {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+            </select>
+          </div>
+          <div style={modal.topBarItem}>
+            <span style={modal.topBarLabel}>Priority</span>
+            <select value={form.priority || ''} onChange={e => setForm(p => ({ ...p, priority: e.target.value || null }))} style={{ ...modal.topBarSelect, color: form.priority === 'high' ? '#EF4444' : form.priority === 'medium' ? '#F59E0B' : form.priority === 'low' ? '#3B82F6' : 'var(--text-secondary)' }}>
+              <option value="">None</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div style={modal.topBarItem}>
+            <span style={modal.topBarLabel}>Due Date</span>
+            <input type="date" value={form.due_date || ''} onChange={e => setForm(p => ({ ...p, due_date: e.target.value || null }))} style={modal.topBarInput} />
+          </div>
+          <div style={modal.topBarItem}>
+            <span style={modal.topBarLabel}>Publish Date</span>
+            <input type="date" value={form.publish_date || ''} onChange={e => setForm(p => ({ ...p, publish_date: e.target.value || null }))} style={modal.topBarInput} />
+          </div>
+        </div>
+
         <div style={modal.body}>
           <div style={modal.main}>
             <div style={modal.section}>
@@ -218,7 +254,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
               <div style={modal.progressTrack}><div style={{ ...modal.progressFill, width: subtasks.length > 0 ? (completedCount / subtasks.length * 100) + '%' : '0%' }} /></div>
               <div style={modal.subtaskList}>
                 {subtasks.map(st => {
-                  const stColor = (st.color && st.color !== '#6B7280') ? st.color : SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280'
+                  const stColor = st.color || SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280'
                   const stAssignee = members.find(m => m.id === st.assignee_id)
                   return (
                     <div key={st.id} style={modal.subtaskItem}>
@@ -239,7 +275,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
                         title={stAssignee ? stAssignee.full_name : 'Assign'}
                       >
                         <option value="">--</option>
-                        {members.map(m => <option key={m.id} value={m.id}>{m.full_name}</option>)}
+                        {members.map(m => <option key={m.id} value={m.id}>{getInitials(m.full_name)}</option>)}
                       </select>
                     </div>
                   )
@@ -264,14 +300,6 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
 
           {/* ── SIDEBAR ── */}
           <div style={modal.sidebar}>
-            <PillSelect label="Status" value={form.status_id} options={statusOpts} onChange={v => setForm(p => ({ ...p, status_id: v }))} placeholder="Select..." />
-            <PillSelect label="Assignee" value={form.assignee_id} options={memberOpts} onChange={v => setForm(p => ({ ...p, assignee_id: v }))} placeholder="Unassigned" />
-            <PillSelect label="Priority" value={form.priority} options={PRIORITIES} onChange={v => setForm(p => ({ ...p, priority: v }))} placeholder="None" />
-
-            <div style={modal.field}><label style={modal.label}>Due Date</label>
-              <input type="date" value={form.due_date || ''} onChange={e => setForm(p => ({ ...p, due_date: e.target.value || null }))} style={modal.input} /></div>
-            <div style={modal.field}><label style={modal.label}>Publish Date</label>
-              <input type="date" value={form.publish_date || ''} onChange={e => setForm(p => ({ ...p, publish_date: e.target.value || null }))} style={modal.input} /></div>
 
             {isYouTube && (<>
               <PillSelect label="Content Pillar" value={form.content_pillar} options={YT_PILLARS} onChange={v => setForm(p => ({ ...p, content_pillar: v }))} placeholder="Select..." />
@@ -525,9 +553,14 @@ const board = {
 const modal = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '40px', zIndex: 1000, overflowY: 'auto' },
   container: { width: '100%', maxWidth: '1000px', background: 'var(--dark-card)', border: '1px solid var(--dark-border)', borderRadius: '16px', margin: '0 20px 40px', overflow: 'hidden' },
-  header: { display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 24px', borderBottom: '1px solid var(--dark-border)' },
-  titleInput: { flex: 1, background: 'transparent', border: 'none', color: 'var(--white)', fontSize: '18px', fontWeight: '600', outline: 'none' },
+  header: { display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 24px 12px', borderBottom: 'none' },
+  titleInput: { flex: 1, background: 'transparent', border: 'none', color: 'var(--white)', fontSize: '22px', fontWeight: '700', outline: 'none' },
   closeBtn: { width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', border: 'none', color: 'var(--text-muted)', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  topBar: { display: 'flex', gap: '24px', padding: '8px 24px 16px', borderBottom: '1px solid var(--dark-border)', flexWrap: 'wrap', alignItems: 'flex-start' },
+  topBarItem: { display: 'flex', flexDirection: 'column', gap: '4px', minWidth: '120px' },
+  topBarLabel: { fontSize: '11px', fontWeight: '500', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.3px' },
+  topBarSelect: { padding: '6px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--dark-border)', borderRadius: '6px', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: '500', outline: 'none', cursor: 'pointer', fontFamily: 'inherit' },
+  topBarInput: { padding: '6px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid var(--dark-border)', borderRadius: '6px', color: 'var(--text-secondary)', fontSize: '13px', outline: 'none', fontFamily: 'inherit' },
   body: { display: 'flex', minHeight: '500px' },
   main: { flex: 1, padding: '24px', overflowY: 'auto', maxHeight: '70vh' },
   sidebar: { width: '320px', padding: '24px', borderLeft: '1px solid var(--dark-border)', overflowY: 'auto', maxHeight: '70vh', display: 'flex', flexDirection: 'column', gap: '12px' },
