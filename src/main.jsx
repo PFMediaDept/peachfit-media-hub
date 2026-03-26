@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Branch, { BranchOverview, BranchSOPs, BranchOnboarding } from './pages/Branch'
 import PipelineBoard from './pages/PipelineBoard'
+import ContentCalendar from './pages/ContentCalendar'
 import AdminUsers from './pages/AdminUsers'
 import AdminSOPs from './pages/AdminSOPs'
 import AdminAnnouncements from './pages/AdminAnnouncements'
@@ -33,6 +34,7 @@ function App() {
             <Route path="/standards" element={<DeptStandards />} />
             <Route path="/assets" element={<BrandAssets />} />
             <Route path="/links" element={<QuickLinks />} />
+            <Route path="/calendar" element={<ContentCalendar />} />
 
             <Route path="/branch/:slug" element={<Branch />}>
               <Route index element={<BranchOverview />} />
