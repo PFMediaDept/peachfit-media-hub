@@ -396,7 +396,7 @@ function TaskDetailModal({ task, onClose, members, statuses, onUpdate }) {
                         onChange={e => updateField('is_sob', e.target.checked)}
                         style={{ accentColor: PEACH }}
                       />
-                      <span style={{ fontSize: 12, color: '#9CA3AF' }}>Sold-Out Broadcast</span>
+                      <span style={{ fontSize: 12, color: '#9CA3AF' }}>School of Bots</span>
                     </label>
                   </FieldRow>
                 </>
