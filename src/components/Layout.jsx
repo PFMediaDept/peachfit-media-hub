@@ -5,7 +5,7 @@ import NotificationBell from './NotificationBell'
 export default function Layout() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
+      <div className="sidebar-desktop"><Sidebar /></div>
       <main style={{
         marginLeft: 'var(--sidebar-width)',
         flex: 1,
