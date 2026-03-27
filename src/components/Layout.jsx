@@ -56,7 +56,7 @@ export default function Layout() {
           ...styles.mobileSidebar,
           transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
         }}>
-          <div style={{position:'relative',width:'100%',height:'100vh',overflow:'auto'}}><Sidebar /></div>
+          <Sidebar />
         </div>
 
         {/* Page content */}
@@ -73,7 +73,7 @@ export default function Layout() {
   // Desktop layout
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <div style={{position:'relative',width:'100%',height:'100vh',overflow:'auto'}}><Sidebar /></div>
+      <Sidebar />
       <main style={{
         marginLeft: 'var(--sidebar-width)',
         flex: 1,
