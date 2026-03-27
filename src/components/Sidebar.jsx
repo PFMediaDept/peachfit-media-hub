@@ -264,9 +264,9 @@ const styles = {
     borderBottom: '1px solid var(--dark-border)',
   },
   logoMark: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '10px',
+    width: '44px',
+    height: '44px',
+    borderRadius: '0',
     
     
     
