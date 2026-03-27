@@ -206,7 +206,6 @@ function TaskDetailModal({task,onClose,members,statuses,onUpdate,readOnly=false}
               {comments.map(c=>(<div key={c.id} style={ms.commentItem}><span style={{fontWeight:600,color:GREEN,fontSize:12}}>{c.author?.full_name||'Unknown'}</span>
                 <span style={{fontSize:11,color:'var(--text-muted)',marginLeft:8}}>{new Date(c.created_at).toLocaleString()}</span>
                 <p style={{margin:'4px 0 0',fontSize:13,color:'var(--text-light, #D1D5DB)'}}>{c.content}</p></div>))}</div>}
-          </div>
             {/* Attachments */}
             <div style={ms.section}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
@@ -229,6 +228,7 @@ function TaskDetailModal({task,onClose,members,statuses,onUpdate,readOnly=false}
               ))}
               {attachments.length===0&&<div style={{fontSize:12,color:"var(--text-muted)",padding:8}}>No files attached</div>}
             </div>
+          </div>
           <div style={ms.right}>
             <div style={ms.section}><h3 style={ms.sectionTitle}>Details</h3>
               {localTask.content_pillar&&<FR label="Pillar"><span style={{fontSize:12,color:WHITE}}>{localTask.content_pillar}</span></FR>}
