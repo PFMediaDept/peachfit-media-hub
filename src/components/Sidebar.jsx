@@ -336,7 +336,7 @@ const styles = {
     color: 'var(--text-muted)',
   },
   signOut: {
-    width: 'var(--sidebar-width)',
+    width: '100%',
     padding: '8px',
     background: 'transparent',
     border: '1px solid var(--dark-border)',
