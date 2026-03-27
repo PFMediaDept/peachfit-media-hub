@@ -15,7 +15,7 @@ export function TeamDirectory() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         {members.map(m => (
           <div key={m.id} style={card}>
-            <div style={avatar}>{m.full_name?.charAt(0) || 'U'}</div>
+            {m.avatar_url ? <img src={m.avatar_url} alt="" style={{...avatar, objectFit: "cover"}} /> : <div style={avatar}>{m.full_name?.charAt(0) || "U"}</div>}
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--white)' }}>
                 {m.full_name}
