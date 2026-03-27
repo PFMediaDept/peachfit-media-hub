@@ -245,7 +245,7 @@ export default function Sidebar() {
 
 const styles = {
   sidebar: {
-    width: '100%',
+    width: 'var(--sidebar-width)',
     height: '100vh',
     position: 'sticky',
     left: 0,
@@ -336,7 +336,7 @@ const styles = {
     color: 'var(--text-muted)',
   },
   signOut: {
-    width: '100%',
+    width: 'var(--sidebar-width)',
     padding: '8px',
     background: 'transparent',
     border: '1px solid var(--dark-border)',
