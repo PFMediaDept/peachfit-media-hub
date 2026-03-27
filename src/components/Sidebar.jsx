@@ -247,7 +247,8 @@ const styles = {
   sidebar: {
     width: 'var(--sidebar-width)',
     height: '100vh',
-    position: 'sticky',
+    position: 'fixed',
+    overflowY: 'auto',
     left: 0,
     top: 0,
     background: 'var(--dark-card)',
