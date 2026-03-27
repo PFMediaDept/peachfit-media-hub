@@ -227,9 +227,11 @@ export default function Sidebar() {
 
       <div style={styles.userArea}>
         <a href="/profile" style={{...styles.userInfo, textDecoration: "none", cursor: "pointer"}}>
-          <div style={styles.avatar}>
-            {profile?.full_name?.charAt(0) || 'U'}
-          </div>
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt="" style={{...styles.avatar, objectFit: "cover"}} />
+          ) : (
+            <div style={styles.avatar}>{profile?.full_name?.charAt(0) || "U"}</div>
+          )}
           <div>
             <div style={styles.userName}>{profile?.full_name || 'User'}</div>
             <div style={styles.userRole}>{profile?.title || 'Team Member'}</div>
