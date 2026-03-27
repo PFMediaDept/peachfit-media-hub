@@ -393,7 +393,7 @@ function TaskCard({ task, members, subtaskCounts, onClick }) {
   const talentList = (task.talent || []).join(', ')
 
   return (
-    <div style={board.card} onClick={() => onClick(task)} draggable
+    <div style={board.card} className="pipeline-card" onClick={() => onClick(task)} draggable
       onDragStart={e => { e.dataTransfer.setData('taskId', task.id); e.dataTransfer.setData('fromStatus', task.status_id); e.currentTarget.style.opacity = '0.4' }}
       onDragEnd={e => { e.currentTarget.style.opacity = '1' }}>
       {/* Title */}
@@ -485,25 +485,25 @@ export default function PipelineBoard() {
 
   return (
     <div>
-      <div style={board.toolbar}>
-        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search tasks..." style={board.searchInput} />
+      <div style={board.toolbar} className="pipeline-toolbar">
+        <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search tasks..." style={board.searchInput} className="pipeline-search" />
         <span style={board.taskCount}>{filtered.length} task{filtered.length !== 1 ? 's' : ''}</span>
       </div>
-      <div style={board.container}>
+      <div style={board.container} className="pipeline-container">
         {statuses.map(status => {
           const col = filtered.filter(t => t.status_id === status.id)
           const isOver = dragOverColumn === status.id
           return (
-            <div key={status.id} style={{ ...board.column, ...(isOver ? board.columnDragOver : {}) }}
+            <div key={status.id} className="pipeline-column" style={{ ...board.column, ...(isOver ? board.columnDragOver : {}) }}
               onDragOver={e => { e.preventDefault(); setDragOverColumn(status.id) }}
               onDragLeave={() => setDragOverColumn(null)} onDrop={e => handleDrop(e, status.id)}>
-              <div style={board.columnHeader}>
+              <div style={board.columnHeader} className="pipeline-column-header">
                 <div style={{ ...board.statusPill, background: status.color + '20', color: status.color, borderColor: status.color + '40' }}>
                   <div style={{ ...board.statusDot, background: status.color }} />{status.name}
                 </div>
                 <span style={board.columnCount}>{col.length}</span>
               </div>
-              <div style={board.cardList}>
+              <div style={board.cardList} className="pipeline-card-list">
                 {col.map(task => (<TaskCard key={task.id} task={task} members={members} subtaskCounts={subtaskCounts} onClick={setSelectedTask} />))}
               </div>
               {newTaskStatus === status.id ? (
@@ -515,7 +515,7 @@ export default function PipelineBoard() {
                   </div>
                 </div>
               ) : (
-                <button onClick={() => { setNewTaskStatus(status.id); setNewTitle('') }} style={board.addTaskBtn}>+ Add task</button>
+                <button onClick={() => { setNewTaskStatus(status.id); setNewTitle('') }} style={board.addTaskBtn} className="pipeline-add-btn">+ Add task</button>
               )}
             </div>
           )
