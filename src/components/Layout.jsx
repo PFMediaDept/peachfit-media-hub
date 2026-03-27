@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
+import NotificationBell from './NotificationBell'
 
 export default function Layout() {
   return (
@@ -8,10 +9,21 @@ export default function Layout() {
       <main style={{
         marginLeft: 'var(--sidebar-width)',
         flex: 1,
-        padding: '32px',
         minHeight: '100vh',
+        position: 'relative',
       }}>
-        <Outlet />
+        {/* Top bar with notification bell */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          padding: '12px 32px 0',
+        }}>
+          <NotificationBell />
+        </div>
+        <div style={{ padding: '12px 32px 32px' }}>
+          <Outlet />
+        </div>
       </main>
     </div>
   )
