@@ -167,6 +167,97 @@ button {
   }
 }
 
+  /* Pipeline board -- vertical stack on mobile */
+  .pipeline-container {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-x: visible !important;
+    gap: 8px !important;
+    padding-bottom: 80px !important;
+  }
+
+  .pipeline-column {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 10px !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .pipeline-column-header {
+    position: sticky !important;
+    top: 50px !important;
+    z-index: 10 !important;
+    background: var(--dark) !important;
+    padding: 10px 12px !important;
+    border-bottom: 1px solid var(--dark-border) !important;
+    cursor: pointer !important;
+  }
+
+  .pipeline-card-list {
+    padding: 4px 0 !important;
+  }
+
+  .pipeline-card-list.collapsed {
+    display: none !important;
+  }
+
+  .pipeline-card {
+    border-radius: 10px !important;
+    padding: 14px !important;
+  }
+
+  .pipeline-search {
+    width: 100% !important;
+  }
+
+  .pipeline-toolbar {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .pipeline-add-btn {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+
+  /* Calendar mobile */
+  .calendar-controls {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .calendar-header {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .calendar-cell {
+    min-height: 70px !important;
+    padding: 4px !important;
+  }
+
+  .calendar-event-pill {
+    font-size: 9px !important;
+    padding: 2px 4px !important;
+  }
+
+  .backlog-sidebar {
+    display: none !important;
+  }
+
+  /* My Tasks mobile */
+  .mytasks-filters {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  /* Desktop bell hide on mobile (shown in mobile topbar instead) */
+  .desktop-only-bell {
+    display: none !important;
+  }
+}
+
 /* Tablet adjustments */
 @media (min-width: 769px) and (max-width: 1024px) {
   :root {
@@ -185,20 +276,42 @@ button {
   }
 }
 
-/* Fix sidebar position inside mobile slide-in */
-@media (max-width: 768px) {
-  nav[style*="position: fixed"] {
-    position: relative !important;
-    width: 100% !important;
-    height: 100% !important;
-  }
+/* ══════════════════════════════════════════════════════════
+   LIGHT THEME
+   Uses CSS filter inversion on the entire page, then
+   un-inverts specific elements that should keep their color
+   (images, brand colors, status dots, avatars, logos)
+   ══════════════════════════════════════════════════════════ */
+
+[data-theme="light"] body {
+  filter: invert(1) hue-rotate(180deg);
+  background-color: #0C0C0C; /* inverts to near-white */
 }
 
-/* Calendar mobile: reduce cell height, smaller text */
-@media (max-width: 768px) {
-  .calendar-grid-cell {
-    min-height: 60px !important;
-    padding: 2px !important;
-    font-size: 10px !important;
-  }
+/* Un-invert images, videos, logos, avatars so they look normal */
+[data-theme="light"] img,
+[data-theme="light"] video,
+[data-theme="light"] svg,
+[data-theme="light"] [style*="background-image"],
+[data-theme="light"] canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Un-invert emoji text so they render correctly */
+[data-theme="light"] .emoji,
+[data-theme="light"] [data-emoji] {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* Scrollbar for light mode */
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #F5F5F5;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #CCCCCC;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #AAAAAA;
 }

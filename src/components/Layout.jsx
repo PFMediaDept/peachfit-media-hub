@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import NotificationBell from './NotificationBell'
 import MobileNav from './MobileNav'
+import ThemeToggle from "./ThemeToggle"
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -43,7 +44,7 @@ export default function Layout() {
             <img src="/logo.avif" alt="PeachFit" style={{ width: 26, height: 26, objectFit: 'contain' }} />
             <span style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>PeachFit</span>
           </div>
-          <NotificationBell />
+          <ThemeToggle /><NotificationBell />
         </div>
 
         {/* Sidebar overlay */}
@@ -86,7 +87,7 @@ export default function Layout() {
           alignItems: 'center',
           padding: '12px 32px 0',
         }}>
-          <NotificationBell />
+          <ThemeToggle /><NotificationBell />
         </div>
         <div style={{ padding: '12px 32px 32px' }}>
           <Outlet />
