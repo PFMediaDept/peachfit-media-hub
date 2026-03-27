@@ -4,11 +4,11 @@ import { supabase } from '../lib/supabase';
 const GREEN = '#37CA37';
 const NEON = '#07FB89';
 const PEACH = '#F4AB9C';
-const BG = '#0C0C0C';
-const CARD = '#141414';
-const CARD_LIGHT = '#1A1A1A';
-const BORDER = '#2A2A2A';
-const WHITE = '#FFFFFF';
+const BG = 'var(--dark)';
+const CARD = 'var(--dark-card)';
+const CARD_LIGHT = 'var(--dark-light)';
+const BORDER = 'var(--dark-border)';
+const WHITE = 'var(--white)';
 
 const BRANCH_COLORS = {
   youtube: '#FF0000',
@@ -64,7 +64,7 @@ function dueLabel(due) {
   if (diff === 0) return { text: 'Due today', color: '#F59E0B' };
   if (diff === 1) return { text: 'Due tomorrow', color: '#F59E0B' };
   if (diff <= 7) return { text: `Due in ${diff}d`, color: '#3B82F6' };
-  return { text: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), color: '#6B7280' };
+  return { text: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), color: 'var(--text-muted)' };
 }
 
 function dueColor(due) {
@@ -222,7 +222,7 @@ function TaskDetailModal({ task, onClose, members, statuses, onUpdate }) {
             <div style={modal.section}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                 <h3 style={modal.sectionTitle}>Subtasks</h3>
-                <span style={{ fontSize: 12, color: '#9CA3AF' }}>{completed}/{total} ({pct}%)</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{completed}/{total} ({pct}%)</span>
               </div>
               <div style={{ height: 4, background: BORDER, borderRadius: 2, marginBottom: 12 }}>
                 <div style={{ height: '100%', width: `${pct}%`, background: GREEN, borderRadius: 2, transition: 'width 0.3s' }} />
@@ -265,8 +265,8 @@ function TaskDetailModal({ task, onClose, members, statuses, onUpdate }) {
               {comments.map(c => (
                 <div key={c.id} style={modal.commentItem}>
                   <span style={{ fontWeight: 600, color: GREEN, fontSize: 12 }}>{c.author?.full_name || 'Unknown'}</span>
-                  <span style={{ fontSize: 11, color: '#6B7280', marginLeft: 8 }}>{new Date(c.created_at).toLocaleString()}</span>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#D1D5DB' }}>{c.content}</p>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{new Date(c.created_at).toLocaleString()}</span>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-light, #D1D5DB)' }}>{c.content}</p>
                 </div>
               ))}
             </div>
@@ -326,7 +326,7 @@ function TaskDetailModal({ task, onClose, members, statuses, onUpdate }) {
                   <FieldRow label="SOB">
                     <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                       <input type="checkbox" checked={localTask.is_sob || false} onChange={e => updateField('is_sob', e.target.checked)} style={{ accentColor: PEACH }} />
-                      <span style={{ fontSize: 12, color: '#9CA3AF' }}>School of Bots</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>School of Bots</span>
                     </label>
                   </FieldRow>
                 </>
@@ -335,7 +335,7 @@ function TaskDetailModal({ task, onClose, members, statuses, onUpdate }) {
                 <FieldRow label="First Pass">
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                     <input type="checkbox" checked={localTask.first_pass || false} onChange={e => updateField('first_pass', e.target.checked)} style={{ accentColor: GREEN }} />
-                    <span style={{ fontSize: 12, color: '#9CA3AF' }}>First pass complete</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>First pass complete</span>
                   </label>
                 </FieldRow>
               )}
@@ -372,7 +372,7 @@ function TaskDetailModal({ task, onClose, members, statuses, onUpdate }) {
 function FieldRow({ label, children }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: `1px solid ${BORDER}` }}>
-      <span style={{ fontSize: 12, color: '#9CA3AF', minWidth: 100 }}>{label}</span>
+      <span style={{ fontSize: 12, color: 'var(--text-secondary)', minWidth: 100 }}>{label}</span>
       <div style={{ flex: 1, maxWidth: 180 }}>{children}</div>
     </div>
   );
@@ -536,7 +536,7 @@ export default function MyTasks() {
   }
 
   if (loading) {
-    return <div style={{ padding: '60px 32px', textAlign: 'center', color: '#6B7280' }}>Loading your tasks...</div>;
+    return <div style={{ padding: '60px 32px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading your tasks...</div>;
   }
 
   return (
@@ -544,7 +544,7 @@ export default function MyTasks() {
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, color: WHITE, margin: '0 0 4px' }}>My Tasks</h1>
-        <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>
+        <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
           {userName ? `Everything assigned to ${userName.split(' ')[0]}` : 'Everything assigned to you'}
         </p>
       </div>
@@ -574,7 +574,7 @@ export default function MyTasks() {
         {(viewFilter === 'all' || viewFilter === 'subtasks') && (
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', marginLeft: 'auto' }}>
             <input type="checkbox" checked={showCompleted} onChange={e => setShowCompleted(e.target.checked)} style={{ accentColor: GREEN }} />
-            <span style={{ fontSize: 12, color: '#9CA3AF' }}>Show completed subtasks</span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Show completed subtasks</span>
           </label>
         )}
       </div>
@@ -594,7 +594,7 @@ export default function MyTasks() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: BRANCH_COLORS[branch] || '#6B7280' }} />
                 <span style={{ fontSize: 13, fontWeight: 600, color: BRANCH_COLORS[branch] || '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{BRANCH_LABELS[branch] || branch}</span>
-                <span style={{ fontSize: 11, color: '#6B7280' }}>({tasks.length})</span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>({tasks.length})</span>
               </div>
               {tasks.map(task => {
                 const due = dueLabel(task.due_date);
@@ -615,15 +615,15 @@ export default function MyTasks() {
                           {task.is_sob && <span style={styles.sobBadge}>SOB</span>}
                         </div>
                         <div style={{ display: 'flex', gap: 12, marginTop: 4, flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: 11, color: '#6B7280' }}>{task.status?.name || getStatusName(task.status_id)}</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{task.status?.name || getStatusName(task.status_id)}</span>
                           {task.priority && <span style={{ fontSize: 11, color: PRIORITY_COLORS[task.priority], fontWeight: 500 }}>{task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</span>}
-                          {task.content_pillar && <span style={{ fontSize: 11, color: '#6B7280' }}>{task.content_pillar}</span>}
+                          {task.content_pillar && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{task.content_pillar}</span>}
                         </div>
                       </div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
                       {due && <span style={{ fontSize: 11, fontWeight: 600, color: due.color }}>{due.text}</span>}
-                      {task.publish_date && <span style={{ fontSize: 10, color: '#6B7280' }}>Publish: {parseLocal(task.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                      {task.publish_date && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Publish: {parseLocal(task.publish_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
                       <div style={{ display: 'flex', gap: 4 }}>
                         {task.script_link && <a href={task.script_link} target="_blank" rel="noopener" onClick={e => e.stopPropagation()} style={styles.linkPill}>Script</a>}
                         {task.drive_folder_link && <a href={task.drive_folder_link} target="_blank" rel="noopener" onClick={e => e.stopPropagation()} style={styles.linkPill}>Drive</a>}
@@ -663,7 +663,7 @@ export default function MyTasks() {
                   onMouseLeave={e => { e.currentTarget.style.background = CARD_LIGHT; }}
                 >
                   <span style={{ fontSize: 12, fontWeight: 600, color: WHITE }}>{task?.title || 'Unknown Task'}</span>
-                  <span style={{ fontSize: 10, color: '#6B7280' }}>{task?.status?.name || ''}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{task?.status?.name || ''}</span>
                   {task?.due_date && (() => { const d = dueLabel(task.due_date); return d ? <span style={{ fontSize: 10, fontWeight: 600, color: d.color, marginLeft: 'auto' }}>{d.text}</span> : null; })()}
                 </div>
                 {subtasks.map(st => {
@@ -673,7 +673,7 @@ export default function MyTasks() {
                       <div style={{ ...styles.subtaskDot, background: stColor, opacity: st.completed ? 0.4 : 1 }} />
                       <input type="checkbox" checked={st.completed} onChange={() => toggleSubtask(st)} style={{ accentColor: GREEN, cursor: 'pointer' }} />
                       <span style={{ flex: 1, fontSize: 13, color: st.completed ? '#6B7280' : WHITE, textDecoration: st.completed ? 'line-through' : 'none' }}>{st.title}</span>
-                      {st.completed && st.completed_at && <span style={{ fontSize: 10, color: '#6B7280' }}>{new Date(st.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                      {st.completed && st.completed_at && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{new Date(st.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
                     </div>
                   );
                 })}
@@ -700,7 +700,7 @@ export default function MyTasks() {
 function StatCard({ label, value, color }) {
   return (
     <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '12px 18px', minWidth: 100, flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <span style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+      <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
       <span style={{ fontSize: 22, fontWeight: 700, color }}>{value}</span>
     </div>
   );
@@ -712,20 +712,20 @@ const modal = {
   content: { background: BG, border: `1px solid ${BORDER}`, borderRadius: 12, width: '90%', maxWidth: 960, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto', boxShadow: '0 24px 48px rgba(0,0,0,0.5)' },
   header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${BORDER}` },
   title: { fontSize: 18, fontWeight: 700, color: WHITE, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  closeBtn: { background: 'transparent', border: 'none', color: '#9CA3AF', fontSize: 24, cursor: 'pointer', padding: '4px 8px', lineHeight: 1 },
+  closeBtn: { background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 24, cursor: 'pointer', padding: '4px 8px', lineHeight: 1 },
   topBar: { display: 'flex', gap: 12, padding: '12px 20px', borderBottom: `1px solid ${BORDER}`, flexWrap: 'wrap', background: CARD },
   topBarItem: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 120 },
-  topBarLabel: { fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  topBarLabel: { fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' },
   topBarSelect: { background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 4, color: WHITE, padding: '4px 8px', fontSize: 12, outline: 'none' },
   body: { display: 'flex', gap: 0, minHeight: 400 },
   left: { flex: 1, padding: 20, borderRight: `1px solid ${BORDER}`, overflowY: 'auto', maxHeight: 'calc(100vh - 240px)' },
   right: { width: 300, padding: 20, overflowY: 'auto', maxHeight: 'calc(100vh - 240px)' },
   section: { marginBottom: 20 },
-  sectionTitle: { fontSize: 13, fontWeight: 600, color: '#9CA3AF', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' },
+  sectionTitle: { fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' },
   textarea: { width: '100%', background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 6, color: WHITE, padding: 10, fontSize: 13, outline: 'none', resize: 'vertical', fontFamily: 'Outfit, Arial, sans-serif' },
   subtaskRow: { display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: `1px solid ${BORDER}22` },
   subtaskDot: { width: 8, height: 8, borderRadius: '50%', flexShrink: 0 },
-  subtaskAssignee: { width: 'auto', minWidth: '100px', padding: '2px 4px', background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 4, color: '#9CA3AF', fontSize: 11, outline: 'none', cursor: 'pointer', flexShrink: 0 },
+  subtaskAssignee: { width: 'auto', minWidth: '100px', padding: '2px 4px', background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 4, color: 'var(--text-secondary)', fontSize: 11, outline: 'none', cursor: 'pointer', flexShrink: 0 },
   commentInput: { flex: 1, background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 6, color: WHITE, padding: '8px 10px', fontSize: 13, outline: 'none', fontFamily: 'Outfit, Arial, sans-serif' },
   commentBtn: { background: GREEN, border: 'none', borderRadius: 6, color: '#000', padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
   commentItem: { padding: '8px 0', borderBottom: `1px solid ${BORDER}22` },
@@ -737,12 +737,12 @@ const modal = {
 /* ── page styles ── */
 const styles = {
   toggleGroup: { display: 'flex', background: CARD_LIGHT, borderRadius: 6, border: `1px solid ${BORDER}`, overflow: 'hidden' },
-  toggleBtn: { background: 'transparent', border: 'none', color: '#9CA3AF', padding: '6px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 500 },
+  toggleBtn: { background: 'transparent', border: 'none', color: 'var(--text-secondary)', padding: '6px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 500 },
   toggleActive: { background: GREEN + '22', color: GREEN },
-  filterBtn: { background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 6, color: '#9CA3AF', padding: '4px 10px', cursor: 'pointer', fontSize: 11, fontWeight: 500 },
+  filterBtn: { background: 'transparent', border: `1px solid ${BORDER}`, borderRadius: 6, color: 'var(--text-secondary)', padding: '4px 10px', cursor: 'pointer', fontSize: 11, fontWeight: 500 },
   sectionHeader: { fontSize: 15, fontWeight: 700, color: WHITE, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8, paddingBottom: 8, borderBottom: `1px solid ${BORDER}` },
   count: { fontSize: 12, fontWeight: 600, color: GREEN, background: GREEN + '15', borderRadius: 10, padding: '2px 8px' },
-  emptyState: { padding: 32, textAlign: 'center', color: '#6B7280', fontSize: 13, background: CARD, borderRadius: 10, border: `1px solid ${BORDER}` },
+  emptyState: { padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, background: CARD, borderRadius: 10, border: `1px solid ${BORDER}` },
   taskCard: {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '12px 16px', background: CARD, border: `1px solid ${BORDER}`,

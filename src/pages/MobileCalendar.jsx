@@ -3,11 +3,11 @@ import { supabase } from '../lib/supabase';
 
 const GREEN = '#37CA37';
 const PEACH = '#F4AB9C';
-const BG = '#0C0C0C';
-const CARD = '#141414';
-const CARD_LIGHT = '#1A1A1A';
-const BORDER = '#2A2A2A';
-const WHITE = '#FFFFFF';
+const BG = 'var(--dark)';
+const CARD = 'var(--dark-card)';
+const CARD_LIGHT = 'var(--dark-light)';
+const BORDER = 'var(--dark-border)';
+const WHITE = 'var(--white)';
 
 const BRANCH_COLORS = { youtube: '#FF0000', 'short-form': '#8B5CF6', 'ads-creative': '#F59E0B', production: '#3B82F6' };
 const BRANCH_LABELS = { youtube: 'YouTube', 'short-form': 'Short Form', 'ads-creative': 'Ads/Creative', production: 'Production' };
@@ -105,7 +105,7 @@ function TaskSheet({task,onClose,members,statuses,branchSlug,onUpdate}){
         <div style={{padding:'16px 20px',overflowY:'auto',maxHeight:'50vh'}}>
           {tab==='details'&&(
             <div>
-              {localTask.description&&<p style={{fontSize:14,color:'#D1D5DB',margin:'0 0 16px',lineHeight:1.5}}>{localTask.description}</p>}
+              {localTask.description&&<p style={{fontSize:14,color:'var(--text-light, #D1D5DB)',margin:'0 0 16px',lineHeight:1.5}}>{localTask.description}</p>}
               <div style={sh.fieldGroup}>
                 {localTask.due_date&&<div style={sh.row}><span style={sh.label}>Due</span><span style={{fontSize:13,color:dueInfo(localTask.due_date)?.color||'#9CA3AF',fontWeight:600}}>{parseLocal(localTask.due_date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span></div>}
                 {localTask.publish_date&&<div style={sh.row}><span style={sh.label}>Publish</span><span style={{fontSize:13,color:WHITE}}>{parseLocal(localTask.publish_date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</span></div>}
@@ -235,7 +235,7 @@ export default function MobileCalendar({tasks,statuses,members}){
       {view==='timeline'&&(
         <div>
           {timeline.length===0&&(
-            <div style={{padding:40,textAlign:'center',color:'#6B7280',fontSize:14,background:CARD,borderRadius:12,border:`1px solid ${BORDER}`}}>No scheduled content</div>
+            <div style={{padding:40,textAlign:'center',color:'var(--text-muted)',fontSize:14,background:CARD,borderRadius:12,border:`1px solid ${BORDER}`}}>No scheduled content</div>
           )}
           {timeline.map(([dateStr,dayTasks])=>(
             <div key={dateStr} style={{marginBottom:16}}>
@@ -259,7 +259,7 @@ export default function MobileCalendar({tasks,statuses,members}){
                 </div>
                 <div>
                   <span style={{fontSize:14,fontWeight:600,color:isToday(dateStr)?GREEN:WHITE}}>{dayLabel(dateStr)}</span>
-                  <span style={{fontSize:11,color:'#6B7280',marginLeft:8}}>{dayTasks.length} item{dayTasks.length!==1?'s':''}</span>
+                  <span style={{fontSize:11,color:'var(--text-muted)',marginLeft:8}}>{dayTasks.length} item{dayTasks.length!==1?'s':''}</span>
                 </div>
                 {isPast(dateStr)&&!isToday(dateStr)&&<span style={{fontSize:10,color:'#EF4444',fontWeight:600,marginLeft:'auto'}}>Past</span>}
               </div>
@@ -289,7 +289,7 @@ export default function MobileCalendar({tasks,statuses,members}){
                           {t.is_sob&&<span style={{fontSize:9,fontWeight:700,color:PEACH,background:PEACH+'22',padding:'1px 5px',borderRadius:3}}>SOB</span>}
                         </div>
                       </div>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" style={{flexShrink:0,marginTop:4}}><polyline points="9 18 15 12 9 6"/></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" style={{flexShrink:0,marginTop:4}}><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
                   </div>
                 );
@@ -309,7 +309,7 @@ export default function MobileCalendar({tasks,statuses,members}){
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:2}}>
             {['S','M','T','W','T','F','S'].map((d,i)=>(
-              <div key={i} style={{textAlign:'center',fontSize:11,fontWeight:600,color:'#6B7280',padding:4}}>{d}</div>
+              <div key={i} style={{textAlign:'center',fontSize:11,fontWeight:600,color:'var(--text-muted)',padding:4}}>{d}</div>
             ))}
             {monthDays.map(({date,inMonth},i)=>{
               const ds=fmt(date);
@@ -329,10 +329,10 @@ export default function MobileCalendar({tasks,statuses,members}){
           </div>
           {/* Tasks for current month below the grid */}
           <div style={{marginTop:16}}>
-            <h3 style={{fontSize:13,fontWeight:700,color:'#9CA3AF',marginBottom:8,textTransform:'uppercase',letterSpacing:'0.05em'}}>This Month</h3>
+            <h3 style={{fontSize:13,fontWeight:700,color:'var(--text-secondary)',marginBottom:8,textTransform:'uppercase',letterSpacing:'0.05em'}}>This Month</h3>
             {timeline.filter(([d])=>{const dt=parseLocal(d);return dt.getMonth()===month&&dt.getFullYear()===year;}).map(([dateStr,dayTasks])=>(
               <div key={dateStr}>
-                <div style={{fontSize:12,fontWeight:600,color:'#6B7280',padding:'8px 0 4px'}}>{dayLabel(dateStr)}</div>
+                <div style={{fontSize:12,fontWeight:600,color:'var(--text-muted)',padding:'8px 0 4px'}}>{dayLabel(dateStr)}</div>
                 {dayTasks.map(t=>{
                   const sc=getStatusColor(t.status?.name);
                   return(
@@ -342,7 +342,7 @@ export default function MobileCalendar({tasks,statuses,members}){
                         <span style={{fontSize:14,fontWeight:500,color:WHITE}}>{t.title}</span>
                         <span style={{fontSize:11,color:sc,marginLeft:8}}>{t.status?.name}</span>
                       </div>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                     </div>
                   );
                 })}
@@ -365,17 +365,17 @@ const sh={
   handle:{width:36,height:4,borderRadius:2,background:'#6B7280'},
   select:{background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:8,color:WHITE,padding:'8px 10px',fontSize:13,outline:'none',flex:1},
   tabBar:{display:'flex',borderBottom:`1px solid ${BORDER}`,padding:'0 20px'},
-  tab:{background:'transparent',border:'none',borderBottom:'2px solid transparent',color:'#6B7280',padding:'10px 14px',fontSize:13,fontWeight:500,cursor:'pointer',whiteSpace:'nowrap'},
+  tab:{background:'transparent',border:'none',borderBottom:'2px solid transparent',color:'var(--text-muted)',padding:'10px 14px',fontSize:13,fontWeight:500,cursor:'pointer',whiteSpace:'nowrap'},
   tabActive:{color:GREEN,borderBottomColor:GREEN},
   fieldGroup:{},
   row:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${BORDER}22`},
-  label:{fontSize:13,color:'#9CA3AF',minWidth:80},
+  label:{fontSize:13,color:'var(--text-secondary)',minWidth:80},
   linkBtn:{display:'inline-flex',alignItems:'center',gap:4,background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:8,color:GREEN,padding:'10px 14px',fontSize:13,fontWeight:600,textDecoration:'none'},
 };
 const cs={
   toggleGroup:{display:'flex',background:CARD_LIGHT,borderRadius:8,border:`1px solid ${BORDER}`,overflow:'hidden'},
-  toggleBtn:{background:'transparent',border:'none',color:'#6B7280',padding:'8px 16px',fontSize:13,fontWeight:600,cursor:'pointer'},
+  toggleBtn:{background:'transparent',border:'none',color:'var(--text-muted)',padding:'8px 16px',fontSize:13,fontWeight:600,cursor:'pointer'},
   toggleActive:{background:GREEN+'22',color:GREEN},
-  filterBtn:{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:8,color:'#6B7280',padding:'6px 10px',cursor:'pointer',fontSize:11,fontWeight:600,whiteSpace:'nowrap'},
+  filterBtn:{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:8,color:'var(--text-muted)',padding:'6px 10px',cursor:'pointer',fontSize:11,fontWeight:600,whiteSpace:'nowrap'},
   navBtn:{background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:8,color:WHITE,padding:'6px 14px',cursor:'pointer',fontSize:16},
 };

@@ -3,10 +3,10 @@ import { supabase } from '../lib/supabase';
 
 const GREEN = '#37CA37';
 const PEACH = '#F4AB9C';
-const CARD = '#141414';
-const CARD_LIGHT = '#1A1A1A';
-const BORDER = '#2A2A2A';
-const WHITE = '#FFFFFF';
+const CARD = 'var(--dark-card)';
+const CARD_LIGHT = 'var(--dark-light)';
+const BORDER = 'var(--dark-border)';
+const WHITE = 'var(--white)';
 
 const TYPE_ICONS = {
   task_assigned: '📋',
@@ -139,7 +139,7 @@ export default function NotificationBell({ onTaskClick }) {
           {/* List */}
           <div style={styles.list}>
             {notifications.length === 0 && (
-              <div style={{ padding: 24, textAlign: 'center', color: '#6B7280', fontSize: 13 }}>
+              <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
                 No notifications yet
               </div>
             )}
@@ -165,7 +165,7 @@ export default function NotificationBell({ onTaskClick }) {
                       }}>
                         {n.title}
                       </span>
-                      <span style={{ fontSize: 10, color: '#6B7280', flexShrink: 0 }}>
+                      <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>
                         {timeAgo(n.created_at)}
                       </span>
                     </div>

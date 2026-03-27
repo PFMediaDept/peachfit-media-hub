@@ -34,7 +34,7 @@ export default function Layout() {
         {/* Mobile top bar */}
         <div style={styles.mobileTopBar}>
           <button onClick={() => setSidebarOpen(true)} style={styles.menuBtn}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--white)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="3" y1="12" x2="21" y2="12" />
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="18" x2="21" y2="18" />
@@ -42,7 +42,7 @@ export default function Layout() {
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <img src="/logo.avif" alt="PeachFit" style={{ width: 26, height: 26, objectFit: 'contain' }} />
-            <span style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>PeachFit</span>
+            <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--white)' }}>PeachFit</span>
           </div>
           <ThemeToggle /><NotificationBell />
         </div>
@@ -104,8 +104,8 @@ const styles = {
     justifyContent: 'space-between',
     padding: '10px 16px',
     paddingTop: 'max(10px, env(safe-area-inset-top))',
-    background: '#0C0C0C',
-    borderBottom: '1px solid #2A2A2A',
+    background: 'var(--dark)',
+    borderBottom: '1px solid var(--dark-border)',
     position: 'sticky',
     top: 0,
     zIndex: 100,

@@ -3,11 +3,11 @@ import { supabase } from '../lib/supabase';
 
 const GREEN = '#37CA37';
 const PEACH = '#F4AB9C';
-const BG = '#0C0C0C';
-const CARD = '#141414';
-const CARD_LIGHT = '#1A1A1A';
-const BORDER = '#2A2A2A';
-const WHITE = '#FFFFFF';
+const BG = 'var(--dark)';
+const CARD = 'var(--dark-card)';
+const CARD_LIGHT = 'var(--dark-light)';
+const BORDER = 'var(--dark-border)';
+const WHITE = 'var(--white)';
 
 const PRIORITY_COLORS = { urgent: '#EF4444', high: '#F59E0B', medium: '#3B82F6', low: '#6B7280' };
 
@@ -28,7 +28,7 @@ function dueInfo(due){
   if(diff===0)return{text:'Today',color:'#F59E0B',urgent:true};
   if(diff===1)return{text:'Tomorrow',color:'#F59E0B',urgent:false};
   if(diff<=7)return{text:`${diff}d`,color:'#3B82F6',urgent:false};
-  return{text:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),color:'#6B7280',urgent:false};
+  return{text:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),color:'var(--text-muted)',urgent:false};
 }
 
 /* ── Bottom Sheet Task Detail ── */
@@ -149,7 +149,7 @@ function BottomSheet({task,onClose,members,statuses,branchSlug,onUpdate}){
               {/* Progress */}
               <div style={{marginBottom:16}}>
                 <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
-                  <span style={{fontSize:13,color:'#9CA3AF'}}>{completed} of {total} complete</span>
+                  <span style={{fontSize:13,color:'var(--text-secondary)'}}>{completed} of {total} complete</span>
                   <span style={{fontSize:13,fontWeight:700,color:pct===100?GREEN:WHITE}}>{pct}%</span>
                 </div>
                 <div style={{height:6,background:BORDER,borderRadius:3}}>
@@ -167,7 +167,7 @@ function BottomSheet({task,onClose,members,statuses,branchSlug,onUpdate}){
                     </div>
                     <div style={{flex:1,minWidth:0}}>
                       <span style={{fontSize:14,color:st.completed?'#6B7280':WHITE,textDecoration:st.completed?'line-through':'none',display:'block'}}>{st.title}</span>
-                      {st.assignee?.full_name&&<span style={{fontSize:11,color:'#6B7280'}}>{st.assignee.full_name}</span>}
+                      {st.assignee?.full_name&&<span style={{fontSize:11,color:'var(--text-muted)'}}>{st.assignee.full_name}</span>}
                     </div>
                   </div>
                 );
@@ -181,14 +181,14 @@ function BottomSheet({task,onClose,members,statuses,branchSlug,onUpdate}){
                 <input value={newComment} onChange={e=>setNewComment(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addComment()} placeholder="Add comment..." style={bs.commentInput}/>
                 <button onClick={addComment} style={bs.commentBtn}>Post</button>
               </div>
-              {comments.length===0&&<div style={{textAlign:'center',color:'#6B7280',fontSize:13,padding:20}}>No activity yet</div>}
+              {comments.length===0&&<div style={{textAlign:'center',color:'var(--text-muted)',fontSize:13,padding:20}}>No activity yet</div>}
               {comments.map(c=>(
                 <div key={c.id} style={bs.commentItem}>
                   <div style={{display:'flex',justifyContent:'space-between',marginBottom:2}}>
                     <span style={{fontSize:12,fontWeight:600,color:GREEN}}>{c.author?.full_name||'Unknown'}</span>
-                    <span style={{fontSize:10,color:'#6B7280'}}>{new Date(c.created_at).toLocaleString()}</span>
+                    <span style={{fontSize:10,color:'var(--text-muted)'}}>{new Date(c.created_at).toLocaleString()}</span>
                   </div>
-                  <p style={{fontSize:13,color:'#D1D5DB',margin:0,lineHeight:1.4}}>{c.content}</p>
+                  <p style={{fontSize:13,color:'var(--text-light, #D1D5DB)',margin:0,lineHeight:1.4}}>{c.content}</p>
                 </div>
               ))}
             </div>
@@ -256,7 +256,7 @@ export default function MobilePipeline({statuses,tasks,members,branchSlug,subtas
           const isActive=activeStatus===s.id;
           return(
             <button key={s.id} onClick={()=>setActiveStatus(s.id)} style={{...mp.statusTab,...(isActive?{background:s.color+'22',color:s.color,borderColor:s.color}:{})}}>
-              <div style={{width:6,height:6,borderRadius:'50%',background:isActive?s.color:'#6B7280',flexShrink:0}}/>
+              <div style={{width:6,height:6,borderRadius:'50%',background:isActive?s.color:'var(--text-muted)',flexShrink:0}}/>
               <span>{s.name}</span>
               {count>0&&<span style={{...mp.tabCount,...(isActive?{background:s.color+'33',color:s.color}:{})}}>{count}</span>}
             </button>
@@ -268,7 +268,7 @@ export default function MobilePipeline({statuses,tasks,members,branchSlug,subtas
       <div style={mp.taskList}>
         {activeTasks.length===0&&(
           <div style={mp.empty}>
-            <span style={{fontSize:14,color:'#6B7280'}}>No tasks in {activeStatusObj?.name||'this status'}</span>
+            <span style={{fontSize:14,color:'var(--text-muted)'}}>No tasks in {activeStatusObj?.name||'this status'}</span>
           </div>
         )}
         {activeTasks.map(task=>{
@@ -282,7 +282,7 @@ export default function MobilePipeline({statuses,tasks,members,branchSlug,subtas
                   <div style={{fontSize:15,fontWeight:600,color:WHITE,marginBottom:4,lineHeight:1.3}}>{task.title}</div>
                   <div style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
                     {task.priority&&<span style={{fontSize:11,fontWeight:600,color:PRIORITY_COLORS[task.priority]}}>{task.priority}</span>}
-                    {task.content_pillar&&<span style={{fontSize:11,color:'#6B7280'}}>{task.content_pillar}</span>}
+                    {task.content_pillar&&<span style={{fontSize:11,color:'var(--text-muted)'}}>{task.content_pillar}</span>}
                     {task.is_sob&&<span style={{fontSize:10,fontWeight:700,color:PEACH,background:PEACH+'22',padding:'1px 5px',borderRadius:3}}>SOB</span>}
                   </div>
                 </div>
@@ -292,15 +292,15 @@ export default function MobilePipeline({statuses,tasks,members,branchSlug,subtas
               {/* Bottom row */}
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10,paddingTop:8,borderTop:`1px solid ${BORDER}`}}>
                 <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                  {assignee&&<span style={{fontSize:11,color:'#9CA3AF'}}>{assignee.full_name}</span>}
-                  {task.editor_assigned&&<span style={{fontSize:11,color:'#6B7280'}}>Ed: {task.editor_assigned}</span>}
+                  {assignee&&<span style={{fontSize:11,color:'var(--text-secondary)'}}>{assignee.full_name}</span>}
+                  {task.editor_assigned&&<span style={{fontSize:11,color:'var(--text-muted)'}}>Ed: {task.editor_assigned}</span>}
                 </div>
                 <div style={{display:'flex',gap:6,alignItems:'center'}}>
-                  {task.publish_date&&<span style={{fontSize:10,color:'#6B7280'}}>{parseLocal(task.publish_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
+                  {task.publish_date&&<span style={{fontSize:10,color:'var(--text-muted)'}}>{parseLocal(task.publish_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>}
                   {stCount&&stCount.total>0&&(
                     <span style={{fontSize:11,color:stCount.done===stCount.total?GREEN:'#6B7280',fontWeight:600}}>✓ {stCount.done}/{stCount.total}</span>
                   )}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
               </div>
             </div>
@@ -316,7 +316,7 @@ export default function MobilePipeline({statuses,tasks,members,branchSlug,subtas
             <div style={bs.handleBar}><div style={bs.handle}/></div>
             <div style={{padding:'0 20px 20px'}}>
               <h3 style={{fontSize:14,fontWeight:700,color:WHITE,margin:'0 0 4px'}}>New Task</h3>
-              <p style={{fontSize:12,color:'#6B7280',margin:'0 0 12px'}}>Adding to: {activeStatusObj?.name}</p>
+              <p style={{fontSize:12,color:'var(--text-muted)',margin:'0 0 12px'}}>Adding to: {activeStatusObj?.name}</p>
               <input value={newTitle} onChange={e=>setNewTitle(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleCreate()} placeholder="Task title..." autoFocus style={{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:8,color:WHITE,padding:'12px 14px',fontSize:15,outline:'none',fontFamily:'Outfit,Arial,sans-serif',boxSizing:'border-box',marginBottom:12}}/>
               <button onClick={handleCreate} disabled={!newTitle.trim()} style={{width:'100%',background:GREEN,border:'none',borderRadius:8,color:'#000',padding:'12px',fontSize:14,fontWeight:700,cursor:'pointer',opacity:newTitle.trim()?1:0.4}}>Create Task</button>
             </div>
@@ -341,12 +341,12 @@ const bs={
   statusBar:{display:'flex',gap:8,padding:'0 20px 12px',flexWrap:'wrap'},
   statusSelect:{background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:8,color:WHITE,padding:'8px 10px',fontSize:13,outline:'none',flex:1,minWidth:0},
   tabBar:{display:'flex',borderBottom:`1px solid ${BORDER}`,padding:'0 20px',gap:0},
-  tab:{background:'transparent',border:'none',borderBottom:'2px solid transparent',color:'#6B7280',padding:'10px 14px',fontSize:13,fontWeight:500,cursor:'pointer',whiteSpace:'nowrap'},
+  tab:{background:'transparent',border:'none',borderBottom:'2px solid transparent',color:'var(--text-muted)',padding:'10px 14px',fontSize:13,fontWeight:500,cursor:'pointer',whiteSpace:'nowrap'},
   tabActive:{color:GREEN,borderBottomColor:GREEN},
   tabContent:{padding:'16px 20px'},
   fieldGroup:{marginBottom:16},
   fieldRow:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${BORDER}22`},
-  fieldLabel:{fontSize:13,color:'#9CA3AF',minWidth:80},
+  fieldLabel:{fontSize:13,color:'var(--text-secondary)',minWidth:80},
   fieldValue:{fontSize:13,color:WHITE,fontWeight:500},
   fieldInput:{background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:6,color:WHITE,padding:'8px 10px',fontSize:13,outline:'none',textAlign:'right'},
   textarea:{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:8,color:WHITE,padding:'10px 12px',fontSize:13,outline:'none',resize:'none',fontFamily:'Outfit,Arial,sans-serif',marginTop:6,boxSizing:'border-box'},
@@ -366,8 +366,8 @@ const mp={
   iconBtn:{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:8,padding:8,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'},
   addBtn:{background:GREEN,border:'none',borderRadius:8,color:'#000',padding:'8px 14px',fontSize:13,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'},
   tabScroll:{display:'flex',gap:6,overflowX:'auto',paddingBottom:12,WebkitOverflowScrolling:'touch',msOverflowStyle:'none',scrollbarWidth:'none'},
-  statusTab:{display:'flex',alignItems:'center',gap:6,background:'transparent',border:`1px solid ${BORDER}`,borderRadius:20,color:'#9CA3AF',padding:'7px 14px',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0,transition:'all 0.15s'},
-  tabCount:{fontSize:10,fontWeight:700,background:'rgba(255,255,255,0.08)',padding:'1px 6px',borderRadius:8},
+  statusTab:{display:'flex',alignItems:'center',gap:6,background:'transparent',border:`1px solid ${BORDER}`,borderRadius:20,color:'var(--text-secondary)',padding:'7px 14px',fontSize:12,fontWeight:600,cursor:'pointer',whiteSpace:'nowrap',flexShrink:0,transition:'all 0.15s'},
+  tabCount:{fontSize:10,fontWeight:700,background:'var(--dark-light)',padding:'1px 6px',borderRadius:8},
   taskList:{flex:1,overflowY:'auto'},
   taskCard:{padding:16,background:CARD,border:`1px solid ${BORDER}`,borderRadius:12,marginBottom:8,cursor:'pointer',transition:'border-color 0.15s'},
   empty:{display:'flex',alignItems:'center',justifyContent:'center',padding:40,background:CARD,borderRadius:12,border:`1px solid ${BORDER}`},

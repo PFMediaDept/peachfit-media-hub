@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
 const GREEN = '#37CA37';
-const BG = '#0C0C0C';
-const CARD = '#141414';
-const CARD_LIGHT = '#1A1A1A';
-const BORDER = '#2A2A2A';
-const WHITE = '#FFFFFF';
+const BG = 'var(--dark)';
+const CARD = 'var(--dark-card)';
+const CARD_LIGHT = 'var(--dark-light)';
+const BORDER = 'var(--dark-border)';
+const WHITE = 'var(--white)';
 
 export default function ProfileEdit() {
   const [profile, setProfile] = useState(null);
@@ -95,15 +95,15 @@ export default function ProfileEdit() {
     setProfile(prev => ({ ...prev, [field]: value }));
   }
 
-  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#6B7280' }}>Loading profile...</div>;
-  if (!profile) return <div style={{ padding: 40, textAlign: 'center', color: '#6B7280' }}>Profile not found</div>;
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Loading profile...</div>;
+  if (!profile) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Profile not found</div>;
 
   const initials = (profile.full_name || 'U').split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2);
 
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 0', fontFamily: 'Outfit, Arial, sans-serif' }}>
       <h1 style={{ fontSize: 24, fontWeight: 700, color: WHITE, margin: '0 0 4px' }}>Edit Profile</h1>
-      <p style={{ fontSize: 14, color: '#6B7280', margin: '0 0 28px' }}>Update your personal information</p>
+      <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: '0 0 28px' }}>Update your personal information</p>
 
       {/* Avatar section */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 32 }}>
@@ -120,7 +120,7 @@ export default function ProfileEdit() {
             {uploading ? 'Uploading...' : 'Change Photo'}
           </button>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} />
-          <p style={{ fontSize: 11, color: '#6B7280', margin: '6px 0 0' }}>JPG, PNG under 2MB</p>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '6px 0 0' }}>JPG, PNG under 2MB</p>
         </div>
       </div>
 
@@ -149,7 +149,7 @@ export default function ProfileEdit() {
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {branches.length > 0 ? branches.map(b => (
                 <span key={b} style={styles.branchPill}>{b}</span>
-              )) : <span style={{ fontSize: 12, color: '#6B7280' }}>None assigned</span>}
+              )) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>None assigned</span>}
             </div>
           </div>
         </div>
@@ -193,7 +193,7 @@ function Field({ label, value, onChange, placeholder, disabled, note }) {
             cursor: disabled ? 'not-allowed' : 'text',
           }}
         />
-        {note && <span style={{ fontSize: 10, color: '#6B7280', display: 'block', marginTop: 2 }}>{note}</span>}
+        {note && <span style={{ fontSize: 10, color: 'var(--text-muted)', display: 'block', marginTop: 2 }}>{note}</span>}
       </div>
     </div>
   );
@@ -207,7 +207,7 @@ const styles = {
   avatarImg: { width: '100%', height: '100%', objectFit: 'cover' },
   avatarPlaceholder: {
     width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: CARD_LIGHT, color: '#6B7280', fontSize: 24, fontWeight: 700,
+    background: CARD_LIGHT, color: 'var(--text-muted)', fontSize: 24, fontWeight: 700,
   },
   avatarOverlay: {
     position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)',
@@ -224,7 +224,7 @@ const styles = {
   },
   section: { marginBottom: 24 },
   sectionTitle: {
-    fontSize: 13, fontWeight: 600, color: '#6B7280', margin: '0 0 12px',
+    fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', margin: '0 0 12px',
     textTransform: 'uppercase', letterSpacing: '0.05em',
     paddingBottom: 8, borderBottom: `1px solid ${BORDER}`,
   },
@@ -232,7 +232,7 @@ const styles = {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '12px 0', borderBottom: `1px solid ${BORDER}22`, gap: 16,
   },
-  fieldLabel: { fontSize: 13, color: '#9CA3AF', minWidth: 100, flexShrink: 0 },
+  fieldLabel: { fontSize: 13, color: 'var(--text-secondary)', minWidth: 100, flexShrink: 0 },
   fieldInput: {
     width: '100%', background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 6,
     color: WHITE, padding: '8px 12px', fontSize: 13, outline: 'none',

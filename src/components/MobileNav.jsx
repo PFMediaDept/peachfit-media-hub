@@ -1,8 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const GREEN = '#37CA37';
-const BG = '#0C0C0C';
-const BORDER = '#2A2A2A';
+const BG = 'var(--dark)';
+const BORDER = 'var(--dark-border)';
 
 const tabs = [
   {

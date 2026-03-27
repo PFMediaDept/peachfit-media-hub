@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 const GREEN = '#37CA37';
-const BG = '#0C0C0C';
-const CARD = '#141414';
-const CARD_LIGHT = '#1A1A1A';
-const BORDER = '#2A2A2A';
-const WHITE = '#FFFFFF';
+const BG = 'var(--dark)';
+const CARD = 'var(--dark-card)';
+const CARD_LIGHT = 'var(--dark-light)';
+const BORDER = 'var(--dark-border)';
+const WHITE = 'var(--white)';
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('');
@@ -77,7 +77,7 @@ export default function ResetPassword() {
           <div style={styles.successBox}>
             <span style={{ fontSize: 24, marginBottom: 8 }}>✓</span>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: GREEN, margin: '0 0 4px' }}>Password Updated</h3>
-            <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>Redirecting to dashboard...</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>Redirecting to dashboard...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={styles.form}>
@@ -85,7 +85,7 @@ export default function ResetPassword() {
 
             {!sessionReady && (
               <div style={{ padding: 16, background: CARD_LIGHT, borderRadius: 8, border: `1px solid ${BORDER}`, marginBottom: 16, textAlign: 'center' }}>
-                <p style={{ fontSize: 13, color: '#9CA3AF', margin: 0 }}>Loading session... If this takes too long, try clicking the reset link in your email again.</p>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>Loading session... If this takes too long, try clicking the reset link in your email again.</p>
               </div>
             )}
 
@@ -121,7 +121,7 @@ export default function ResetPassword() {
         )}
 
         <div style={{ textAlign: 'center', marginTop: 16 }}>
-          <a href="/login" style={{ fontSize: 13, color: '#6B7280', textDecoration: 'none' }}>
+          <a href="/login" style={{ fontSize: 13, color: 'var(--text-muted)', textDecoration: 'none' }}>
             Back to sign in
           </a>
         </div>
@@ -146,11 +146,11 @@ const styles = {
     fontSize: 22, fontWeight: 700, color: WHITE, margin: '0 0 4px', textAlign: 'center',
   },
   subtitle: {
-    fontSize: 14, color: '#6B7280', margin: 0, textAlign: 'center',
+    fontSize: 14, color: 'var(--text-muted)', margin: 0, textAlign: 'center',
   },
   form: { display: 'flex', flexDirection: 'column', gap: 16 },
   field: { display: 'flex', flexDirection: 'column', gap: 6 },
-  label: { fontSize: 13, fontWeight: 600, color: '#9CA3AF' },
+  label: { fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' },
   input: {
     background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 8,
     color: WHITE, padding: '10px 14px', fontSize: 14, outline: 'none',

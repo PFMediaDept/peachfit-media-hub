@@ -15,17 +15,17 @@ const PILL_COLORS = {
   // Content Pillars (Ads)
   vsl: '#EF4444', 'ugc-style': '#F59E0B', testimonial: '#10B981', 'direct-response': '#3B82F6', 'brand-awareness': '#8B5CF6',
   // Content Pillars (Production)
-  'youtube-shoot': '#3B82F6', 'ad-shoot': '#F97316', 'photo-shoot': '#EC4899', 'b-roll': '#10B981', equipment: '#6B7280',
+  'youtube-shoot': '#3B82F6', 'ad-shoot': '#F97316', 'photo-shoot': '#EC4899', 'b-roll': '#10B981', equipment: 'var(--text-muted)',
   // Content Tiers
   flagship: '#EF4444', standard: '#3B82F6', 'quick-turn': '#10B981', 'high-production': '#8B5CF6', hero: '#EF4444', iteration: '#F59E0B',
   // QC Results
   pass: '#10B981', 'minor-revisions': '#F59E0B', 'targeted-revisions': '#F97316', 'major-revisions': '#EF4444', restart: '#DC2626',
   // Thumbnail Status
-  'not-started': '#6B7280', 'in-progress': '#F59E0B', ready: '#10B981', 'ab-testing': '#8B5CF6',
+  'not-started': 'var(--text-muted)', 'in-progress': '#F59E0B', ready: '#10B981', 'ab-testing': '#8B5CF6',
 }
 
 function getPillColor(value) {
-  return PILL_COLORS[value] || '#6B7280'
+  return PILL_COLORS[value] || 'var(--text-muted)'
 }
 
 // ── PILL SELECT COMPONENT ──
@@ -107,7 +107,7 @@ function getInitials(name) {
 // Subtask colors mapped to pipeline stage colors by sort_order
 const SUBTASK_COLORS = {
   youtube: {
-    1: '#6B7280',  // Idea validated -- Idea Bank gray
+    1: 'var(--text-muted)',  // Idea validated -- Idea Bank gray
     2: '#F59E0B',  // Script drafted -- In Production amber
     3: '#F59E0B',  // Script reviewed -- In Production amber
     4: '#F59E0B',  // Filming scheduled -- In Production amber
@@ -214,7 +214,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
         <div style={modal.topBar}>
           <div style={modal.topBarItem}>
             <span style={modal.topBarLabel}>Status</span>
-            <select value={form.status_id || ''} onChange={e => setForm(p => ({ ...p, status_id: e.target.value }))} style={{ ...modal.topBarSelect, background: (statuses.find(s => s.id === form.status_id)?.color || '#6B7280') + '25', color: statuses.find(s => s.id === form.status_id)?.color || '#6B7280', borderColor: (statuses.find(s => s.id === form.status_id)?.color || '#6B7280') + '50' }}>
+            <select value={form.status_id || ''} onChange={e => setForm(p => ({ ...p, status_id: e.target.value }))} style={{ ...modal.topBarSelect, background: (statuses.find(s => s.id === form.status_id)?.color || 'var(--text-muted)') + '25', color: statuses.find(s => s.id === form.status_id)?.color || 'var(--text-muted)', borderColor: (statuses.find(s => s.id === form.status_id)?.color || 'var(--text-muted)') + '50' }}>
               {statuses.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
@@ -255,7 +255,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
               <div style={modal.progressTrack}><div style={{ ...modal.progressFill, width: subtasks.length > 0 ? (completedCount / subtasks.length * 100) + '%' : '0%' }} /></div>
               <div style={modal.subtaskList}>
                 {subtasks.map(st => {
-                  const stColor = (st.color && st.color !== '#6B7280') ? st.color : SUBTASK_COLORS[branchSlug]?.[st.sort_order] || '#6B7280'
+                  const stColor = (st.color && st.color !== 'var(--text-muted)') ? st.color : SUBTASK_COLORS[branchSlug]?.[st.sort_order] || 'var(--text-muted)'
                   const stAssignee = members.find(m => m.id === st.assignee_id)
                   return (
                     <div key={st.id} style={modal.subtaskItem}>

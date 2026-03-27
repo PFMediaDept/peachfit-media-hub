@@ -277,41 +277,37 @@ button {
 }
 
 /* ══════════════════════════════════════════════════════════
-   LIGHT THEME
-   Uses CSS filter inversion on the entire page, then
-   un-inverts specific elements that should keep their color
-   (images, brand colors, status dots, avatars, logos)
+
+/* ══════════════════════════════════════════════════════════
+   THEME SYSTEM
    ══════════════════════════════════════════════════════════ */
 
+[data-theme="light"] {
+  --dark: #F5F5F5;
+  --dark-light: #F0F0F0;
+  --dark-card: #FFFFFF;
+  --dark-border: #E0E0E0;
+  --white: #111111;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --text-muted: #6B7280;
+  --gray-100: #1A1A1A;
+  --gray-200: #2A2A2A;
+  --gray-300: #444444;
+  --gray-400: #666666;
+  --gray-500: #999999;
+  --gray-600: #CCCCCC;
+}
+
 [data-theme="light"] body {
-  filter: invert(1) hue-rotate(180deg);
-  background-color: #0C0C0C; /* inverts to near-white */
+  background-color: #F5F5F5;
+  color: #111111;
 }
 
-/* Un-invert images, videos, logos, avatars so they look normal */
-[data-theme="light"] img,
-[data-theme="light"] video,
-[data-theme="light"] svg,
-[data-theme="light"] [style*="background-image"],
-[data-theme="light"] canvas {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-/* Un-invert emoji text so they render correctly */
-[data-theme="light"] .emoji,
-[data-theme="light"] [data-emoji] {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-/* Scrollbar for light mode */
 [data-theme="light"] ::-webkit-scrollbar-track {
   background: #F5F5F5;
 }
 
 [data-theme="light"] ::-webkit-scrollbar-thumb {
   background: #CCCCCC;
-}
-
-[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-  background: #AAAAAA;
 }

@@ -4,11 +4,11 @@ import { supabase } from '../lib/supabase';
 
 const GREEN = '#37CA37';
 const PEACH = '#F4AB9C';
-const BG = '#0C0C0C';
-const CARD = '#141414';
-const CARD_LIGHT = '#1A1A1A';
-const BORDER = '#2A2A2A';
-const WHITE = '#FFFFFF';
+const BG = 'var(--dark)';
+const CARD = 'var(--dark-card)';
+const CARD_LIGHT = 'var(--dark-light)';
+const BORDER = 'var(--dark-border)';
+const WHITE = 'var(--white)';
 
 const BRANCH_COLORS = { youtube: '#FF0000', 'short-form': '#8B5CF6', 'ads-creative': '#F59E0B', production: '#3B82F6' };
 const BRANCH_LABELS = { youtube: 'YouTube', 'short-form': 'Short Form', 'ads-creative': 'Ads/Creative', production: 'Production' };
@@ -71,7 +71,7 @@ function QuickAddModal({date,statuses,onClose,onCreated}){
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={onClose}>
       <div style={{background:BG,border:`1px solid ${BORDER}`,borderRadius:12,padding:20,width:380,boxShadow:'0 16px 48px rgba(0,0,0,0.5)'}} onClick={e=>e.stopPropagation()}>
         <h3 style={{fontSize:14,fontWeight:700,color:WHITE,margin:'0 0 4px'}}>Quick Add</h3>
-        <p style={{fontSize:12,color:'#6B7280',margin:'0 0 16px'}}>{date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</p>
+        <p style={{fontSize:12,color:'var(--text-muted)',margin:'0 0 16px'}}>{date.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</p>
         <input ref={ref} value={title} onChange={e=>setTitle(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleCreate()} placeholder="Task title..." style={{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:6,color:WHITE,padding:'10px 12px',fontSize:13,outline:'none',marginBottom:12,fontFamily:'Outfit,Arial,sans-serif',boxSizing:'border-box'}}/>
         <div style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}}>
           {Object.entries(BRANCH_LABELS).map(([slug,label])=>(
@@ -80,7 +80,7 @@ function QuickAddModal({date,statuses,onClose,onCreated}){
         </div>
         {branch==='short-form'&&(
           <div style={{marginBottom:12}}>
-            <span style={{fontSize:11,color:'#6B7280',marginBottom:4,display:'block'}}>Content Type</span>
+            <span style={{fontSize:11,color:'var(--text-muted)',marginBottom:4,display:'block'}}>Content Type</span>
             <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
               {Object.entries(CONTENT_TYPE_LABELS).map(([key,label])=>(
                 <button key={key} onClick={()=>setContentType(contentType===key?'':key)} style={{background:contentType===key?(CONTENT_TYPE_COLORS[key]||'#6B7280')+'33':'transparent',border:`1px solid ${contentType===key?CONTENT_TYPE_COLORS[key]||'#6B7280':BORDER}`,color:contentType===key?CONTENT_TYPE_COLORS[key]||WHITE:'#6B7280',borderRadius:4,padding:'3px 8px',fontSize:10,fontWeight:600,cursor:'pointer'}}>{label}</button>
@@ -89,7 +89,7 @@ function QuickAddModal({date,statuses,onClose,onCreated}){
           </div>
         )}
         <div style={{display:'flex',gap:8,justifyContent:'flex-end'}}>
-          <button onClick={onClose} style={{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:6,color:'#9CA3AF',padding:'6px 14px',fontSize:12,cursor:'pointer'}}>Cancel</button>
+          <button onClick={onClose} style={{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:6,color:'var(--text-secondary)',padding:'6px 14px',fontSize:12,cursor:'pointer'}}>Cancel</button>
           <button onClick={handleCreate} disabled={!title.trim()||saving} style={{background:GREEN,border:'none',borderRadius:6,color:'#000',padding:'6px 14px',fontSize:12,fontWeight:600,cursor:'pointer',opacity:!title.trim()||saving?0.5:1}}>{saving?'Creating...':'Create'}</button>
         </div>
       </div>
@@ -114,20 +114,20 @@ function ShareModal({onClose}){
       <div style={{background:BG,border:`1px solid ${BORDER}`,borderRadius:12,padding:20,width:440,boxShadow:'0 16px 48px rgba(0,0,0,0.5)'}} onClick={e=>e.stopPropagation()}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
           <h3 style={{fontSize:14,fontWeight:700,color:WHITE,margin:0}}>Share Calendar</h3>
-          <button onClick={onClose} style={{background:'transparent',border:'none',color:'#9CA3AF',fontSize:18,cursor:'pointer'}}>&times;</button>
+          <button onClick={onClose} style={{background:'transparent',border:'none',color:'var(--text-secondary)',fontSize:18,cursor:'pointer'}}>&times;</button>
         </div>
-        <p style={{fontSize:12,color:'#6B7280',margin:'0 0 16px'}}>Generate a read-only link anyone can view without logging in.</p>
+        <p style={{fontSize:12,color:'var(--text-muted)',margin:'0 0 16px'}}>Generate a read-only link anyone can view without logging in.</p>
         <button onClick={createShare} disabled={creating} style={{background:GREEN,border:'none',borderRadius:6,color:'#000',padding:'8px 16px',fontSize:12,fontWeight:600,cursor:'pointer',marginBottom:16,opacity:creating?0.5:1,width:'100%'}}>
           {creating?'Creating...':'Generate New Link'}
         </button>
-        {shares.length===0&&<div style={{padding:16,textAlign:'center',color:'#6B7280',fontSize:12}}>No active share links</div>}
+        {shares.length===0&&<div style={{padding:16,textAlign:'center',color:'var(--text-muted)',fontSize:12}}>No active share links</div>}
         {shares.map(s=>(
           <div key={s.id} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 0',borderBottom:`1px solid ${BORDER}22`}}>
             <div style={{flex:1,minWidth:0}}>
               <div style={{fontSize:11,color:WHITE,fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
                 {window.location.origin}/calendar/public/{s.token}
               </div>
-              <span style={{fontSize:10,color:'#6B7280'}}>Created {new Date(s.created_at).toLocaleDateString()}</span>
+              <span style={{fontSize:10,color:'var(--text-muted)'}}>Created {new Date(s.created_at).toLocaleDateString()}</span>
             </div>
             <button onClick={()=>copyLink(s.token)} style={{background:copied===s.token?GREEN+'33':'transparent',border:`1px solid ${copied===s.token?GREEN:BORDER}`,borderRadius:4,color:copied===s.token?GREEN:'#9CA3AF',padding:'4px 8px',fontSize:10,fontWeight:600,cursor:'pointer',flexShrink:0}}>
               {copied===s.token?'Copied':'Copy'}
@@ -164,7 +164,7 @@ function TaskDetailModal({task,onClose,members,statuses,onUpdate,readOnly=false}
             <div style={{width:10,height:10,borderRadius:'50%',background:BRANCH_COLORS[branchSlug]||GREEN,flexShrink:0}}/>
             <h2 style={ms.title}>{localTask.title}</h2>
             {localTask.content_type&&<span style={{fontSize:9,fontWeight:700,color:contentTypeColor||'#9CA3AF',background:(contentTypeColor||'#6B7280')+'22',padding:'2px 6px',borderRadius:4,flexShrink:0}}>{CONTENT_TYPE_LABELS[localTask.content_type]||localTask.content_type}</span>}
-            {readOnly&&<span style={{fontSize:9,fontWeight:700,color:'#6B7280',background:'#6B728022',padding:'2px 6px',borderRadius:4,flexShrink:0}}>READ ONLY</span>}
+            {readOnly&&<span style={{fontSize:9,fontWeight:700,color:'var(--text-muted)',background:'#6B728022',padding:'2px 6px',borderRadius:4,flexShrink:0}}>READ ONLY</span>}
           </div>
           <button onClick={onClose} style={ms.closeBtn}>&times;</button>
         </div>
@@ -188,21 +188,21 @@ function TaskDetailModal({task,onClose,members,statuses,onUpdate,readOnly=false}
         </div>
         <div style={ms.body}>
           <div style={ms.left}>
-            {localTask.description&&<div style={ms.section}><h3 style={ms.sectionTitle}>Description</h3><p style={{fontSize:13,color:'#D1D5DB',margin:0,lineHeight:1.5}}>{localTask.description}</p></div>}
+            {localTask.description&&<div style={ms.section}><h3 style={ms.sectionTitle}>Description</h3><p style={{fontSize:13,color:'var(--text-light, #D1D5DB)',margin:0,lineHeight:1.5}}>{localTask.description}</p></div>}
             {total>0&&<div style={ms.section}>
-              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><h3 style={ms.sectionTitle}>Subtasks</h3><span style={{fontSize:12,color:'#9CA3AF'}}>{completed}/{total} ({pct}%)</span></div>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}><h3 style={ms.sectionTitle}>Subtasks</h3><span style={{fontSize:12,color:'var(--text-secondary)'}}>{completed}/{total} ({pct}%)</span></div>
               <div style={{height:4,background:BORDER,borderRadius:2,marginBottom:12}}><div style={{height:'100%',width:`${pct}%`,background:GREEN,borderRadius:2,transition:'width 0.3s'}}/></div>
               {subtasks.map(st=>{const stColor=(st.color&&st.color!=='#6B7280')?st.color:SUBTASK_COLORS[branchSlug]?.[st.sort_order]||'#6B7280';
                 return(<div key={st.id} style={ms.subtaskRow}><div style={{...ms.subtaskDot,background:stColor,opacity:st.completed?0.4:1}}/>
                   {!readOnly&&<input type="checkbox" checked={st.completed} onChange={()=>toggleSubtask(st)} style={{accentColor:GREEN,cursor:'pointer'}}/>}
                   <span style={{flex:1,fontSize:13,color:st.completed?'#6B7280':WHITE,textDecoration:st.completed?'line-through':'none'}}>{st.title}</span>
-                  {st.assignee?.full_name&&<span style={{fontSize:10,color:'#6B7280'}}>{st.assignee.full_name}</span>}
+                  {st.assignee?.full_name&&<span style={{fontSize:10,color:'var(--text-muted)'}}>{st.assignee.full_name}</span>}
                 </div>);})}
             </div>}
             {comments.length>0&&<div style={ms.section}><h3 style={ms.sectionTitle}>Activity</h3>
               {comments.map(c=>(<div key={c.id} style={ms.commentItem}><span style={{fontWeight:600,color:GREEN,fontSize:12}}>{c.author?.full_name||'Unknown'}</span>
-                <span style={{fontSize:11,color:'#6B7280',marginLeft:8}}>{new Date(c.created_at).toLocaleString()}</span>
-                <p style={{margin:'4px 0 0',fontSize:13,color:'#D1D5DB'}}>{c.content}</p></div>))}</div>}
+                <span style={{fontSize:11,color:'var(--text-muted)',marginLeft:8}}>{new Date(c.created_at).toLocaleString()}</span>
+                <p style={{margin:'4px 0 0',fontSize:13,color:'var(--text-light, #D1D5DB)'}}>{c.content}</p></div>))}</div>}
           </div>
           <div style={ms.right}>
             <div style={ms.section}><h3 style={ms.sectionTitle}>Details</h3>
@@ -225,7 +225,7 @@ function TaskDetailModal({task,onClose,members,statuses,onUpdate,readOnly=false}
     </div>
   );
 }
-function FR({label,children}){return(<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 0',borderBottom:`1px solid ${BORDER}`}}><span style={{fontSize:12,color:'#9CA3AF',minWidth:80}}>{label}</span><div style={{flex:1,maxWidth:180}}>{children}</div></div>);}
+function FR({label,children}){return(<div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 0',borderBottom:`1px solid ${BORDER}`}}><span style={{fontSize:12,color:'var(--text-secondary)',minWidth:80}}>{label}</span><div style={{flex:1,maxWidth:180}}>{children}</div></div>);}
 
 /* ══════════════════════════════════════════════════════════
    CONTENT CALENDAR (MAIN -- AUTHENTICATED)
@@ -273,12 +273,12 @@ export default function ContentCalendar(){
         {/* Header */}
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}}>
           <div><h1 style={{fontSize:24,fontWeight:700,color:WHITE,fontFamily:'Outfit,Arial,sans-serif',margin:'0 0 4px'}}>Content Calendar</h1>
-            <p style={{fontSize:12,color:'#6B7280',margin:0}}>Click empty day to add -- drag to reschedule</p></div>
+            <p style={{fontSize:12,color:'var(--text-muted)',margin:0}}>Click empty day to add -- drag to reschedule</p></div>
           <div style={{display:'flex',gap:8,alignItems:'center'}}>
-            <div style={cs.backlogMeter}><span style={{fontSize:11,color:'#9CA3AF'}}>YT</span><span style={{fontSize:14,fontWeight:700,color:backlogColor(backlogDepth.youtube)}}>{backlogDepth.youtube}w</span></div>
-            <div style={cs.backlogMeter}><span style={{fontSize:11,color:'#9CA3AF'}}>SF</span><span style={{fontSize:14,fontWeight:700,color:backlogColor(backlogDepth.shortForm)}}>{backlogDepth.shortForm}w</span></div>
+            <div style={cs.backlogMeter}><span style={{fontSize:11,color:'var(--text-secondary)'}}>YT</span><span style={{fontSize:14,fontWeight:700,color:backlogColor(backlogDepth.youtube)}}>{backlogDepth.youtube}w</span></div>
+            <div style={cs.backlogMeter}><span style={{fontSize:11,color:'var(--text-secondary)'}}>SF</span><span style={{fontSize:14,fontWeight:700,color:backlogColor(backlogDepth.shortForm)}}>{backlogDepth.shortForm}w</span></div>
             <button onClick={()=>setSidebarOpen(!sidebarOpen)} style={{...cs.navBtn,color:sidebarOpen?GREEN:'#9CA3AF',fontSize:12}}>{sidebarOpen?'Hide':'Backlog'} ({unscheduledTasks.length})</button>
-            <button onClick={()=>setShareModal(true)} style={{...cs.navBtn,color:'#9CA3AF',fontSize:12}}>Share</button>
+            <button onClick={()=>setShareModal(true)} style={{...cs.navBtn,color:'var(--text-secondary)',fontSize:12}}>Share</button>
           </div>
         </div>
 
@@ -314,14 +314,14 @@ export default function ContentCalendar(){
         {/* Status legend */}
         <div style={{display:'flex',gap:12,marginBottom:12,flexWrap:'wrap'}}>
           {[['Idea/Backlog','#6B7280'],['Production','#F59E0B'],['Filming','#3B82F6'],['Editing','#8B5CF6'],['QC','#EC4899'],['Ready','#10B981'],['Published','#37CA37'],['Story','#E040FB']].map(([l,c])=>(
-            <div key={l} style={{display:'flex',alignItems:'center',gap:4}}><div style={{width:8,height:8,borderRadius:'50%',background:c}}/><span style={{fontSize:10,color:'#6B7280'}}>{l}</span></div>
+            <div key={l} style={{display:'flex',alignItems:'center',gap:4}}><div style={{width:8,height:8,borderRadius:'50%',background:c}}/><span style={{fontSize:10,color:'var(--text-muted)'}}>{l}</span></div>
           ))}
         </div>
 
         {/* Calendar grid */}
         <div style={{background:CARD,borderRadius:12,border:`1px solid ${BORDER}`,overflow:'hidden'}}>
           <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:`1px solid ${BORDER}`}}>
-            {DAYS.map(d=>(<div key={d} style={{padding:'10px 8px',fontSize:12,fontWeight:600,color:'#9CA3AF',textAlign:'center'}}>{d}</div>))}
+            {DAYS.map(d=>(<div key={d} style={{padding:'10px 8px',fontSize:12,fontWeight:600,color:'var(--text-secondary)',textAlign:'center'}}>{d}</div>))}
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)'}}>
             {displayDays.map(({date,inMonth},i)=>{
@@ -348,7 +348,7 @@ export default function ContentCalendar(){
                         </div>
                       );
                     })}
-                    {dayTasks.length>(viewMode==='month'?4:20)&&<span style={{fontSize:10,color:'#6B7280',paddingLeft:6}}>+{dayTasks.length-(viewMode==='month'?4:20)} more</span>}
+                    {dayTasks.length>(viewMode==='month'?4:20)&&<span style={{fontSize:10,color:'var(--text-muted)',paddingLeft:6}}>+{dayTasks.length-(viewMode==='month'?4:20)} more</span>}
                   </div>
                 </div>
               );
@@ -361,8 +361,8 @@ export default function ContentCalendar(){
       {sidebarOpen&&(
         <div style={{width:260,padding:'24px 16px',marginTop:60,borderLeft:`1px solid ${BORDER}`,overflowY:'auto',maxHeight:'calc(100vh - 40px)',position:'sticky',top:0}}>
           <h3 style={{fontSize:13,fontWeight:700,color:WHITE,margin:'0 0 4px'}}>Unscheduled</h3>
-          <p style={{fontSize:11,color:'#6B7280',margin:'0 0 12px'}}>Drag onto calendar to schedule</p>
-          {unscheduledTasks.length===0&&<div style={{padding:16,textAlign:'center',color:'#6B7280',fontSize:12,background:CARD,borderRadius:8,border:`1px solid ${BORDER}`}}>All tasks scheduled</div>}
+          <p style={{fontSize:11,color:'var(--text-muted)',margin:'0 0 12px'}}>Drag onto calendar to schedule</p>
+          {unscheduledTasks.length===0&&<div style={{padding:16,textAlign:'center',color:'var(--text-muted)',fontSize:12,background:CARD,borderRadius:8,border:`1px solid ${BORDER}`}}>All tasks scheduled</div>}
           {unscheduledTasks.map(t=>{const sc=getStatusColor(t.status?.name);const isStory=t.content_type==='story';
             return(<div key={t.id} draggable onDragStart={()=>setDragTask(t)} onDragEnd={()=>{setDragTask(null);setDragOver(null);}} onClick={()=>setSelectedTask(t)}
               style={{padding:'8px 10px',marginBottom:6,background:CARD,border:`1px solid ${BORDER}`,borderLeft:`3px solid ${isStory?'#E040FB':sc}`,borderRadius:6,cursor:'grab'}}>
@@ -417,8 +417,8 @@ export function PublicCalendar(){
   function nav(dir){const d=new Date(curDate);if(viewMode==='month')d.setMonth(d.getMonth()+dir);else d.setDate(d.getDate()+dir*7);setCurDate(d);}
   const today=new Date();
 
-  if(loading)return<div style={{padding:60,textAlign:'center',color:'#6B7280',fontFamily:'Outfit,Arial,sans-serif'}}>Loading calendar...</div>;
-  if(error)return<div style={{padding:60,textAlign:'center',fontFamily:'Outfit,Arial,sans-serif'}}><h2 style={{color:'#EF4444',fontSize:18}}>Access Denied</h2><p style={{color:'#6B7280'}}>{error}</p></div>;
+  if(loading)return<div style={{padding:60,textAlign:'center',color:'var(--text-muted)',fontFamily:'Outfit,Arial,sans-serif'}}>Loading calendar...</div>;
+  if(error)return<div style={{padding:60,textAlign:'center',fontFamily:'Outfit,Arial,sans-serif'}}><h2 style={{color:'#EF4444',fontSize:18}}>Access Denied</h2><p style={{color:'var(--text-muted)'}}>{error}</p></div>;
 
   return(
     <div style={{padding:'24px 32px',maxWidth:1200,margin:'0 auto',fontFamily:'Outfit,Arial,sans-serif'}}>
@@ -426,7 +426,7 @@ export function PublicCalendar(){
         <div><div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
           <img src="/logo.avif" alt="PeachFit" style={{width:40,height:40,borderRadius:8,objectFit:'contain'}}/>
           <h1 style={{fontSize:22,fontWeight:700,color:WHITE,margin:0}}>PeachFit Content Calendar</h1></div>
-          <p style={{fontSize:12,color:'#6B7280',margin:0}}>Read-only view</p></div>
+          <p style={{fontSize:12,color:'var(--text-muted)',margin:0}}>Read-only view</p></div>
       </div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:12}}>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
@@ -450,12 +450,12 @@ export function PublicCalendar(){
       </div>
       <div style={{display:'flex',gap:12,marginBottom:12,flexWrap:'wrap'}}>
         {[['Idea/Backlog','#6B7280'],['Production','#F59E0B'],['Filming','#3B82F6'],['Editing','#8B5CF6'],['QC','#EC4899'],['Ready','#10B981'],['Published','#37CA37'],['Story','#E040FB']].map(([l,c])=>(
-          <div key={l} style={{display:'flex',alignItems:'center',gap:4}}><div style={{width:8,height:8,borderRadius:'50%',background:c}}/><span style={{fontSize:10,color:'#6B7280'}}>{l}</span></div>
+          <div key={l} style={{display:'flex',alignItems:'center',gap:4}}><div style={{width:8,height:8,borderRadius:'50%',background:c}}/><span style={{fontSize:10,color:'var(--text-muted)'}}>{l}</span></div>
         ))}
       </div>
       <div style={{background:CARD,borderRadius:12,border:`1px solid ${BORDER}`,overflow:'hidden'}}>
         <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:`1px solid ${BORDER}`}}>
-          {DAYS.map(d=>(<div key={d} style={{padding:'10px 8px',fontSize:12,fontWeight:600,color:'#9CA3AF',textAlign:'center'}}>{d}</div>))}
+          {DAYS.map(d=>(<div key={d} style={{padding:'10px 8px',fontSize:12,fontWeight:600,color:'var(--text-secondary)',textAlign:'center'}}>{d}</div>))}
         </div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)'}}>
           {displayDays.map(({date,inMonth},i)=>{const dateStr=fmt(date);const dayTasks=tasksByDate[dateStr]||[];const isToday=sameDay(date,today);
@@ -470,7 +470,7 @@ export function PublicCalendar(){
                       <div style={{width:6,height:6,borderRadius:'50%',background:BRANCH_COLORS[t.branch_slug]||'#6B7280'}}/>
                     </div></div>);
                 })}
-                {dayTasks.length>(viewMode==='month'?4:20)&&<span style={{fontSize:10,color:'#6B7280',paddingLeft:6}}>+{dayTasks.length-(viewMode==='month'?4:20)} more</span>}
+                {dayTasks.length>(viewMode==='month'?4:20)&&<span style={{fontSize:10,color:'var(--text-muted)',paddingLeft:6}}>+{dayTasks.length-(viewMode==='month'?4:20)} more</span>}
               </div></div>);
           })}
         </div>
@@ -481,5 +481,5 @@ export function PublicCalendar(){
 }
 
 /* ── styles ── */
-const ms={overlay:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'flex-start',justifyContent:'center',paddingTop:40,overflowY:'auto'},content:{background:BG,border:`1px solid ${BORDER}`,borderRadius:12,width:'90%',maxWidth:960,maxHeight:'calc(100vh - 80px)',overflowY:'auto',boxShadow:'0 24px 48px rgba(0,0,0,0.5)'},header:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 20px',borderBottom:`1px solid ${BORDER}`},title:{fontSize:18,fontWeight:700,color:WHITE,margin:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'},closeBtn:{background:'transparent',border:'none',color:'#9CA3AF',fontSize:24,cursor:'pointer',padding:'4px 8px',lineHeight:1},topBar:{display:'flex',gap:12,padding:'12px 20px',borderBottom:`1px solid ${BORDER}`,flexWrap:'wrap',background:CARD},topBarItem:{display:'flex',flexDirection:'column',gap:4,minWidth:120},topBarLabel:{fontSize:10,fontWeight:600,color:'#6B7280',textTransform:'uppercase',letterSpacing:'0.05em'},topBarSelect:{background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:4,color:WHITE,padding:'4px 8px',fontSize:12,outline:'none'},body:{display:'flex',gap:0,minHeight:400},left:{flex:1,padding:20,borderRight:`1px solid ${BORDER}`,overflowY:'auto',maxHeight:'calc(100vh - 240px)'},right:{width:300,padding:20,overflowY:'auto',maxHeight:'calc(100vh - 240px)'},section:{marginBottom:20},sectionTitle:{fontSize:13,fontWeight:600,color:'#9CA3AF',margin:'0 0 8px',textTransform:'uppercase',letterSpacing:'0.05em'},textarea:{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:6,color:WHITE,padding:10,fontSize:13,outline:'none',resize:'vertical',fontFamily:'Outfit,Arial,sans-serif'},subtaskRow:{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:`1px solid ${BORDER}22`},subtaskDot:{width:8,height:8,borderRadius:'50%',flexShrink:0},subtaskAssignee:{width:'auto',minWidth:'100px',padding:'2px 4px',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:4,color:'#9CA3AF',fontSize:11,outline:'none',cursor:'pointer',flexShrink:0},commentInput:{flex:1,background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:6,color:WHITE,padding:'8px 10px',fontSize:13,outline:'none',fontFamily:'Outfit,Arial,sans-serif'},commentBtn:{background:GREEN,border:'none',borderRadius:6,color:'#000',padding:'8px 16px',fontSize:12,fontWeight:600,cursor:'pointer'},commentItem:{padding:'8px 0',borderBottom:`1px solid ${BORDER}22`},fieldSelect:{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:4,color:WHITE,padding:'4px 6px',fontSize:12,outline:'none'},fieldInput:{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:4,color:WHITE,padding:'4px 6px',fontSize:12,outline:'none',fontFamily:'Outfit,Arial,sans-serif'},linkPill:{display:'inline-block',background:GREEN+'15',color:GREEN,border:`1px solid ${GREEN}33`,borderRadius:4,padding:'3px 8px',fontSize:11,fontWeight:600,textDecoration:'none',cursor:'pointer'}};
-const cs={navBtn:{background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:6,color:WHITE,padding:'6px 12px',cursor:'pointer',fontSize:14},todayBtn:{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:6,color:GREEN,padding:'6px 14px',cursor:'pointer',fontSize:12,fontWeight:600},toggleGroup:{display:'flex',background:CARD_LIGHT,borderRadius:6,border:`1px solid ${BORDER}`,overflow:'hidden'},toggleBtn:{background:'transparent',border:'none',color:'#9CA3AF',padding:'6px 14px',cursor:'pointer',fontSize:12,fontWeight:500},toggleActive:{background:GREEN+'22',color:GREEN},filterBtn:{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:6,color:'#9CA3AF',padding:'4px 10px',cursor:'pointer',fontSize:11,fontWeight:500},backlogMeter:{display:'flex',flexDirection:'column',alignItems:'center',background:CARD,border:`1px solid ${BORDER}`,borderRadius:8,padding:'6px 14px',minWidth:60},eventPill:{display:'flex',alignItems:'center',justifyContent:'space-between',gap:4,padding:'3px 6px',borderRadius:4,textAlign:'left',border:'none',width:'100%',transition:'opacity 0.15s'}};
+const ms={overlay:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'flex-start',justifyContent:'center',paddingTop:40,overflowY:'auto'},content:{background:BG,border:`1px solid ${BORDER}`,borderRadius:12,width:'90%',maxWidth:960,maxHeight:'calc(100vh - 80px)',overflowY:'auto',boxShadow:'0 24px 48px rgba(0,0,0,0.5)'},header:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 20px',borderBottom:`1px solid ${BORDER}`},title:{fontSize:18,fontWeight:700,color:WHITE,margin:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'},closeBtn:{background:'transparent',border:'none',color:'var(--text-secondary)',fontSize:24,cursor:'pointer',padding:'4px 8px',lineHeight:1},topBar:{display:'flex',gap:12,padding:'12px 20px',borderBottom:`1px solid ${BORDER}`,flexWrap:'wrap',background:CARD},topBarItem:{display:'flex',flexDirection:'column',gap:4,minWidth:120},topBarLabel:{fontSize:10,fontWeight:600,color:'var(--text-muted)',textTransform:'uppercase',letterSpacing:'0.05em'},topBarSelect:{background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:4,color:WHITE,padding:'4px 8px',fontSize:12,outline:'none'},body:{display:'flex',gap:0,minHeight:400},left:{flex:1,padding:20,borderRight:`1px solid ${BORDER}`,overflowY:'auto',maxHeight:'calc(100vh - 240px)'},right:{width:300,padding:20,overflowY:'auto',maxHeight:'calc(100vh - 240px)'},section:{marginBottom:20},sectionTitle:{fontSize:13,fontWeight:600,color:'var(--text-secondary)',margin:'0 0 8px',textTransform:'uppercase',letterSpacing:'0.05em'},textarea:{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:6,color:WHITE,padding:10,fontSize:13,outline:'none',resize:'vertical',fontFamily:'Outfit,Arial,sans-serif'},subtaskRow:{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:`1px solid ${BORDER}22`},subtaskDot:{width:8,height:8,borderRadius:'50%',flexShrink:0},subtaskAssignee:{width:'auto',minWidth:'100px',padding:'2px 4px',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:4,color:'var(--text-secondary)',fontSize:11,outline:'none',cursor:'pointer',flexShrink:0},commentInput:{flex:1,background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:6,color:WHITE,padding:'8px 10px',fontSize:13,outline:'none',fontFamily:'Outfit,Arial,sans-serif'},commentBtn:{background:GREEN,border:'none',borderRadius:6,color:'#000',padding:'8px 16px',fontSize:12,fontWeight:600,cursor:'pointer'},commentItem:{padding:'8px 0',borderBottom:`1px solid ${BORDER}22`},fieldSelect:{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:4,color:WHITE,padding:'4px 6px',fontSize:12,outline:'none'},fieldInput:{width:'100%',background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:4,color:WHITE,padding:'4px 6px',fontSize:12,outline:'none',fontFamily:'Outfit,Arial,sans-serif'},linkPill:{display:'inline-block',background:GREEN+'15',color:GREEN,border:`1px solid ${GREEN}33`,borderRadius:4,padding:'3px 8px',fontSize:11,fontWeight:600,textDecoration:'none',cursor:'pointer'}};
+const cs={navBtn:{background:CARD_LIGHT,border:`1px solid ${BORDER}`,borderRadius:6,color:WHITE,padding:'6px 12px',cursor:'pointer',fontSize:14},todayBtn:{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:6,color:GREEN,padding:'6px 14px',cursor:'pointer',fontSize:12,fontWeight:600},toggleGroup:{display:'flex',background:CARD_LIGHT,borderRadius:6,border:`1px solid ${BORDER}`,overflow:'hidden'},toggleBtn:{background:'transparent',border:'none',color:'var(--text-secondary)',padding:'6px 14px',cursor:'pointer',fontSize:12,fontWeight:500},toggleActive:{background:GREEN+'22',color:GREEN},filterBtn:{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:6,color:'var(--text-secondary)',padding:'4px 10px',cursor:'pointer',fontSize:11,fontWeight:500},backlogMeter:{display:'flex',flexDirection:'column',alignItems:'center',background:CARD,border:`1px solid ${BORDER}`,borderRadius:8,padding:'6px 14px',minWidth:60},eventPill:{display:'flex',alignItems:'center',justifyContent:'space-between',gap:4,padding:'3px 6px',borderRadius:4,textAlign:'left',border:'none',width:'100%',transition:'opacity 0.15s'}};

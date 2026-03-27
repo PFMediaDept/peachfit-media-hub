@@ -5,10 +5,10 @@ import { supabase } from '../lib/supabase'
 
 const GREEN = '#37CA37';
 const PEACH = '#F4AB9C';
-const CARD = '#141414';
-const CARD_LIGHT = '#1A1A1A';
-const BORDER = '#2A2A2A';
-const WHITE = '#FFFFFF';
+const CARD = 'var(--dark-card)';
+const CARD_LIGHT = 'var(--dark-light)';
+const BORDER = 'var(--dark-border)';
+const WHITE = 'var(--white)';
 
 const BRANCH_COLORS = { youtube: '#FF0000', 'short-form': '#8B5CF6', 'ads-creative': '#F59E0B', production: '#3B82F6' };
 const BRANCH_LABELS = { youtube: 'YouTube', 'short-form': 'Short Form', 'ads-creative': 'Ads/Creative', production: 'Production' };
@@ -24,7 +24,7 @@ function dueLabel(due){
   if(diff===0)return{text:'Today',color:'#F59E0B'};
   if(diff===1)return{text:'Tomorrow',color:'#F59E0B'};
   if(diff<=7)return{text:`in ${diff}d`,color:'#3B82F6'};
-  return{text:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),color:'#6B7280'};
+  return{text:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),color:'var(--text-muted)'};
 }
 
 export default function Dashboard() {
@@ -120,7 +120,7 @@ export default function Dashboard() {
         <h1 style={{ fontSize: 24, fontWeight: 700, color: WHITE, margin: '0 0 4px', fontFamily: 'Outfit, Arial, sans-serif' }}>
           {greeting()}, {profile?.full_name?.split(' ')[0] || 'team member'}
         </h1>
-        <p style={{ fontSize: 14, color: '#6B7280', margin: 0 }}>Here's what's happening in the media department.</p>
+        <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>Here's what's happening in the media department.</p>
       </div>
 
       {/* Stats row */}
@@ -163,7 +163,7 @@ export default function Dashboard() {
         <div style={s.card}>
           <div style={s.cardHeader}>
             <h2 style={s.cardTitle}>Recent Activity</h2>
-            <span style={{ fontSize: 11, color: '#6B7280' }}>{stats.unreadNotifs} unread</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{stats.unreadNotifs} unread</span>
           </div>
           {notifications.length === 0 ? (
             <div style={s.empty}>All caught up</div>
@@ -175,9 +175,9 @@ export default function Dashboard() {
                 </span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontSize: 12, fontWeight: 600, color: WHITE }}>{n.title}</span>
-                  <p style={{ fontSize: 12, color: '#9CA3AF', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.body}</p>
+                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.body}</p>
                 </div>
-                <span style={{ fontSize: 10, color: '#6B7280', flexShrink: 0 }}>{timeAgo(n.created_at)}</span>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>{timeAgo(n.created_at)}</span>
               </div>
             ))
           )}
@@ -195,15 +195,15 @@ export default function Dashboard() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: BRANCH_COLORS[slug] }} />
                 <span style={{ fontSize: 13, fontWeight: 700, color: BRANCH_COLORS[slug] }}>{BRANCH_LABELS[slug]}</span>
-                <span style={{ fontSize: 12, color: '#6B7280', marginLeft: 'auto' }}>{data.total} active</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 'auto' }}>{data.total} active</span>
               </div>
               <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 {Object.entries(data.byStatus).filter(([,c]) => c > 0).map(([name, count]) => (
-                  <span key={name} style={{ fontSize: 10, color: '#9CA3AF', background: 'rgba(255,255,255,0.04)', padding: '2px 6px', borderRadius: 4 }}>
+                  <span key={name} style={{ fontSize: 10, color: 'var(--text-secondary)', background: 'var(--dark-light)', padding: '2px 6px', borderRadius: 4 }}>
                     {name}: {count}
                   </span>
                 ))}
-                {data.total === 0 && <span style={{ fontSize: 11, color: '#6B7280' }}>No active tasks</span>}
+                {data.total === 0 && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>No active tasks</span>}
               </div>
             </Link>
           ))}
@@ -217,7 +217,7 @@ export default function Dashboard() {
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: BRANCH_COLORS[branch.slug] || GREEN }} />
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: WHITE }}>{branch.name}</div>
-              <div style={{ fontSize: 12, color: '#6B7280' }}>View pipeline & SOPs</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>View pipeline & SOPs</div>
             </div>
           </Link>
         ))}
@@ -233,12 +233,12 @@ export default function Dashboard() {
         ) : (
           announcements.map(a => (
             <div key={a.id} style={s.announcementRow}>
-              <span style={{ fontSize: 11, color: '#6B7280', minWidth: 60, flexShrink: 0 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', minWidth: 60, flexShrink: 0 }}>
                 {new Date(a.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </span>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: WHITE }}>{a.title}</div>
-                <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{a.body}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{a.body}</div>
               </div>
             </div>
           ))
@@ -257,7 +257,7 @@ export default function Dashboard() {
           ].map(([to, label, desc]) => (
             <Link key={to} to={to} style={s.quickCard}>
               <div style={{ fontSize: 13, fontWeight: 600, color: WHITE }}>{label}</div>
-              <div style={{ fontSize: 11, color: '#6B7280' }}>{desc}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{desc}</div>
             </Link>
           ))}
         </div>
@@ -269,7 +269,7 @@ export default function Dashboard() {
 function StatCard({ label, value, color, link }) {
   const inner = (
     <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <span style={{ fontSize: 10, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{label}</span>
+      <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{label}</span>
       <span style={{ fontSize: 22, fontWeight: 700, color }}>{value}</span>
     </div>
   );
@@ -290,7 +290,7 @@ const s = {
   cardHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${BORDER}` },
   cardTitle: { fontSize: 14, fontWeight: 700, color: WHITE, margin: 0 },
   cardLink: { fontSize: 12, color: GREEN, textDecoration: 'none', fontWeight: 600 },
-  empty: { padding: 20, textAlign: 'center', color: '#6B7280', fontSize: 13 },
+  empty: { padding: 20, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 },
   deadlineRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: `1px solid ${BORDER}11`, textDecoration: 'none', cursor: 'pointer' },
   activityRow: { display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: `1px solid ${BORDER}11` },
   pipelineCard: { background: CARD_LIGHT, border: `1px solid ${BORDER}`, borderRadius: 10, padding: 14, textDecoration: 'none', transition: 'border-color 0.15s' },
