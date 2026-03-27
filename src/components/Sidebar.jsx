@@ -226,7 +226,7 @@ export default function Sidebar() {
       </nav>
 
       <div style={styles.userArea}>
-        <div style={styles.userInfo}>
+        <a href="/profile" style={{...styles.userInfo, textDecoration: "none", cursor: "pointer"}}>
           <div style={styles.avatar}>
             {profile?.full_name?.charAt(0) || 'U'}
           </div>
@@ -234,7 +234,7 @@ export default function Sidebar() {
             <div style={styles.userName}>{profile?.full_name || 'User'}</div>
             <div style={styles.userRole}>{profile?.title || 'Team Member'}</div>
           </div>
-        </div>
+        </a>
         <button onClick={handleSignOut} style={styles.signOut}>
           Sign out
         </button>
