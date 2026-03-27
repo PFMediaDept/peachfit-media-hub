@@ -1,3 +1,4 @@
+import MobileCalendar from "./MobileCalendar"
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -242,6 +243,11 @@ export default function ContentCalendar(){
     const[tRes,sRes,mRes]=await Promise.all([supabase.from('pipeline_tasks').select('*, status:pipeline_statuses(name,branch_slug)'),supabase.from('pipeline_statuses').select('*').order('sort_order'),supabase.from('profiles').select('id,full_name')]);
     if(tRes.data)setTasks(tRes.data);if(sRes.data)setStatuses(sRes.data);if(mRes.data)setMembers(mRes.data);
   }
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  useEffect(() => { const h = () => setIsMobile(window.innerWidth < 768); window.addEventListener("resize", h); return () => window.removeEventListener("resize", h); }, [])
+  if (isMobile) return <MobileCalendar tasks={tasks} statuses={statuses} members={members} />
+
 
   const backlogDepth=useMemo(()=>{const now=new Date();const calc=(slug)=>{const pub=statuses.filter(s=>s.branch_slug===slug&&/published|posted|archived/i.test(s.name)).map(s=>s.id);const up=tasks.filter(t=>t.branch_slug===slug&&!pub.includes(t.status_id)&&t.publish_date&&parseLocal(t.publish_date)>=now);return slug==='youtube'?Math.round(up.length/2):Math.round(up.length/7);};return{youtube:calc('youtube'),shortForm:calc('short-form')};},[tasks,statuses]);
   function backlogColor(w){if(w<3)return'#EF4444';if(w<=5)return'#F59E0B';return'#10B981';}
