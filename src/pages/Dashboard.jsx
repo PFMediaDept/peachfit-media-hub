@@ -30,6 +30,7 @@ function dueLabel(due){
 export default function Dashboard() {
   const { profile, branches } = useAuth()
   const [announcements, setAnnouncements] = useState([])
+  const [campaigns, setCampaigns] = useState([])
   const [myTasks, setMyTasks] = useState([])
   const [allTasks, setAllTasks] = useState([])
   const [notifications, setNotifications] = useState([])
@@ -38,12 +39,14 @@ export default function Dashboard() {
   useEffect(() => { load(); }, [profile])
 
   async function load() {
-    const [aRes, nRes, sRes, tRes] = await Promise.all([
+    const [campRes, aRes, nRes, sRes, tRes] = await Promise.all([
+      supabase.from('active_campaigns').select('*').eq('is_active', true).order('launch_date', { ascending: false }),
       supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(3),
       supabase.from('notifications').select('*').eq('user_id', profile?.id || '').eq('read', false).order('created_at', { ascending: false }).limit(5),
       supabase.from('pipeline_statuses').select('*').order('sort_order'),
       supabase.from('pipeline_tasks').select('*, status:pipeline_statuses(name, branch_slug)').order('due_date', { ascending: true, nullsFirst: false }),
     ]);
+    if (campRes.data) setCampaigns(campRes.data);
     if (aRes.data) setAnnouncements(aRes.data);
     if (nRes.data) setNotifications(nRes.data);
     if (sRes.data) setStatuses(sRes.data);
@@ -222,6 +225,42 @@ export default function Dashboard() {
           </Link>
         ))}
       </div>
+
+      {/* Active Campaigns */}
+      {campaigns.length > 0 && (
+        <div style={{ ...s.card, marginBottom: 16, borderLeft: '3px solid #F59E0B' }}>
+          <div style={s.cardHeader}>
+            <h2 style={s.cardTitle}>Active Campaigns (SOB)</h2>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{campaigns.length} active</span>
+          </div>
+          {campaigns.map(c => (
+            <div key={c.id} style={{ padding: '10px 0', borderBottom: '1px solid var(--dark-border)22' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--white)' }}>{c.name}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: c.campaign_type === 'lead_magnet' ? '#F59E0B' : '#37CA37', background: c.campaign_type === 'lead_magnet' ? '#F59E0B15' : '#37CA3715', padding: '2px 6px', borderRadius: 4 }}>
+                  {c.campaign_type === 'lead_magnet' ? 'Lead Magnet' : 'DM Funnel'}
+                </span>
+              </div>
+              {c.cta_posts && (
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>
+                  <span style={{ fontWeight: 600 }}>Posts/Lives:</span> {c.cta_posts}
+                </div>
+              )}
+              {c.cta_stories && (
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 2 }}>
+                  <span style={{ fontWeight: 600 }}>Stories:</span> {c.cta_stories}
+                </div>
+              )}
+              {c.pinned_comment && (
+                <div style={{ fontSize: 11, color: '#F59E0B', background: '#F59E0B10', padding: '4px 8px', borderRadius: 4, marginTop: 4 }}>
+                  Pinned comment: {c.pinned_comment}
+                </div>
+              )}
+              {c.notes && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{c.notes}</div>}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Announcements */}
       <div style={{ ...s.card, marginBottom: 24 }}>
