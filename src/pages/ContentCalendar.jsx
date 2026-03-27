@@ -497,7 +497,7 @@ export default function ContentCalendar() {
       {/* Unscheduled sidebar */}
       {sidebarOpen && (
         <div style={{
-          width: 260, padding: '24px 16px 24px 0', borderLeft: `1px solid ${BORDER}`,
+          width: 260, padding: '24px 16px', marginTop: 60, borderLeft: `1px solid ${BORDER}`,
           overflowY: 'auto', maxHeight: 'calc(100vh - 40px)', position: 'sticky', top: 0,
         }}>
           <h3 style={{ fontSize: 13, fontWeight: 700, color: WHITE, margin: '0 0 4px' }}>Unscheduled</h3>
