@@ -8,7 +8,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Branch, { BranchOverview, BranchSOPs, BranchOnboarding } from './pages/Branch'
 import PipelineBoard from './pages/PipelineBoard'
-import ContentCalendar from './pages/ContentCalendar'
+import ContentCalendar, { PublicCalendar } from "./pages/ContentCalendar"
 import MyTasks from "./pages/MyTasks"
 import AdminUsers from './pages/AdminUsers'
 import AdminSOPs from './pages/AdminSOPs'
@@ -24,6 +24,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+            <Route path="/calendar/public/:token" element={<PublicCalendar />} />
 
           <Route element={
             <ProtectedRoute>
