@@ -154,12 +154,17 @@ export function BranchSOPs() {
                   {sop.description && (
                     <div style={styles.sopDesc}>{sop.description}</div>
                   )}
+                  {sop.loom_url && (
+                    <div style={{marginTop:12,borderRadius:8,overflow:'hidden',border:'1px solid var(--dark-border)'}}>
+                      <iframe
+                        src={sop.loom_url.replace('/share/', '/embed/')}
+                        frameBorder="0"
+                        allowFullScreen
+                        style={{width:'100%',height:280,display:'block'}}
+                      />
+                    </div>
+                  )}
                   <div style={styles.sopLinks}>
-                    {sop.loom_url && (
-                      <a href={sop.loom_url} target="_blank" rel="noopener noreferrer" style={styles.sopLink}>
-                        Loom
-                      </a>
-                    )}
                     {sop.doc_url && (
                       <a href={sop.doc_url} target="_blank" rel="noopener noreferrer" style={styles.sopLink}>
                         Google Doc
