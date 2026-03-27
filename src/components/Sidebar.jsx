@@ -95,10 +95,10 @@ const sectionIcons = {
 }
 
 const branchColors = {
-  youtube: '#378ADD',
-  'short-form': '#7F77DD',
-  'ads-creative': '#D85A30',
-  production: '#D4537E',
+  youtube: '#FF0000',
+  'short-form': '#8B5CF6',
+  'ads-creative': '#F59E0B',
+  production: '#3B82F6',
 }
 
 export default function Sidebar() {
