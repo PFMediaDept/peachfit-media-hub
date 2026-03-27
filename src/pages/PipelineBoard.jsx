@@ -1,3 +1,4 @@
+import MobilePipeline from "./MobilePipeline"
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -482,6 +483,11 @@ export default function PipelineBoard() {
   const filtered = searchQuery.trim()
     ? tasks.filter(t => t.title.toLowerCase().includes(searchQuery.toLowerCase()) || (t.content_pillar||'').toLowerCase().includes(searchQuery.toLowerCase()) || (t.editor_assigned||'').toLowerCase().includes(searchQuery.toLowerCase()) || (t.description||'').toLowerCase().includes(searchQuery.toLowerCase()))
     : tasks
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  useEffect(() => { const h = () => setIsMobile(window.innerWidth < 768); window.addEventListener("resize", h); return () => window.removeEventListener("resize", h); }, [])
+
+  if (isMobile) return <MobilePipeline statuses={statuses} tasks={filtered} members={members} branchSlug={slug} subtaskCounts={subtaskCounts} onUpdate={fetchTasks} onCreateTask={fetchTasks} />
 
   return (
     <div>
