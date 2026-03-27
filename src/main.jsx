@@ -12,6 +12,7 @@ import PipelineBoard from './pages/PipelineBoard'
 import ContentCalendar, { PublicCalendar } from "./pages/ContentCalendar"
 import MyTasks from "./pages/MyTasks"
 import ProfileEdit from "./pages/ProfileEdit"
+import Analytics from "./pages/Analytics"
 import AdminUsers from './pages/AdminUsers'
 import AdminSOPs from './pages/AdminSOPs'
 import AdminAnnouncements from './pages/AdminAnnouncements'
@@ -41,6 +42,7 @@ function App() {
             <Route path="/links" element={<QuickLinks />} />
               <Route path="/my-tasks" element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
             <Route path="/calendar" element={<ContentCalendar />} />
 
             <Route path="/branch/:slug" element={<Branch />}>
