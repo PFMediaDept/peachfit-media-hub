@@ -5,6 +5,7 @@ import { AuthProvider } from './lib/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import ResetPassword from "./pages/ResetPassword"
 import Dashboard from './pages/Dashboard'
 import Branch, { BranchOverview, BranchSOPs, BranchOnboarding } from './pages/Branch'
 import PipelineBoard from './pages/PipelineBoard'
@@ -25,6 +26,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/calendar/public/:token" element={<PublicCalendar />} />
 
           <Route element={

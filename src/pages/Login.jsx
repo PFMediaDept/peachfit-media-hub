@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { supabase } from "../lib/supabase"
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
 
@@ -33,11 +34,20 @@ export default function Login() {
     }
   }
 
+  async function handleForgotPassword() {
+    if (!email) { setError("Enter your email first, then click Forgot password."); return; }
+    setError("");
+    const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset-password",
+    });
+    if (resetErr) { setError(resetErr.message); }
+    else { setError(""); alert("Check your email for a password reset link."); }
+  }
   return (
     <div style={styles.container}>
       <div style={styles.card}>
         <div style={styles.logoArea}>
-          <div style={styles.logoMark}>P</div>
+          <img src="/logo.avif" alt="PeachFit" style={{width:48,height:48,objectFit:"contain"}}/>
           <h1 style={styles.title}>PeachFit Media Hub</h1>
           <p style={styles.subtitle}>Sign in to your department portal</p>
         </div>
@@ -78,6 +88,10 @@ export default function Login() {
             }}
           >
             {submitting || loading ? 'Signing in...' : 'Sign In'}
+          </button>
+
+          <button type="button" onClick={handleForgotPassword} style={{background:"transparent",border:"none",color:"#6B7280",fontSize:13,cursor:"pointer",padding:"8px 0",textAlign:"center",width:"100%"}}>
+            Forgot your password?
           </button>
         </form>
 
