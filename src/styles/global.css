@@ -184,3 +184,21 @@ button {
     display: none !important;
   }
 }
+
+/* Fix sidebar position inside mobile slide-in */
+@media (max-width: 768px) {
+  nav[style*="position: fixed"] {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
+
+/* Calendar mobile: reduce cell height, smaller text */
+@media (max-width: 768px) {
+  .calendar-grid-cell {
+    min-height: 60px !important;
+    padding: 2px !important;
+    font-size: 10px !important;
+  }
+}
