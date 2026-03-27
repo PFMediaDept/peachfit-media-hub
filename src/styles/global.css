@@ -167,56 +167,6 @@ button {
   }
 }
 
-  /* Pipeline board -- vertical stack on mobile */
-  .pipeline-container {
-    display: flex !important;
-    flex-direction: column !important;
-    overflow-x: visible !important;
-    gap: 8px !important;
-    padding-bottom: 80px !important;
-  }
-
-  .pipeline-column {
-    min-width: 100% !important;
-    max-width: 100% !important;
-    border-radius: 10px !important;
-    padding: 0 !important;
-    background: transparent !important;
-  }
-
-  .pipeline-column-header {
-    position: sticky !important;
-    top: 50px !important;
-    z-index: 10 !important;
-    background: var(--dark) !important;
-    padding: 10px 12px !important;
-    border-bottom: 1px solid var(--dark-border) !important;
-    cursor: pointer !important;
-  }
-
-  .pipeline-card-list {
-    padding: 4px 0 !important;
-  }
-
-  .pipeline-card-list.collapsed {
-    display: none !important;
-  }
-
-  .pipeline-card {
-    border-radius: 10px !important;
-    padding: 14px !important;
-  }
-
-  .pipeline-search {
-    width: 100% !important;
-  }
-
-  .pipeline-toolbar {
-    flex-direction: column !important;
-    gap: 8px !important;
-  }
-
-  .pipeline-add-btn {
     padding: 12px !important;
     font-size: 14px !important;
   }
