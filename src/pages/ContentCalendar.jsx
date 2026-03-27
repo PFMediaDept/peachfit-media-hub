@@ -142,16 +142,19 @@ function ShareModal({onClose}){
 
 /* ── Task Detail Modal ── */
 function TaskDetailModal({task,onClose,members,statuses,onUpdate,readOnly=false}){
-  const[subtasks,setSubtasks]=useState([]);const[comments,setComments]=useState([]);
+  const[subtasks,setSubtasks]=useState([]);const[comments,setComments]=useState([]);const[attachments,setAttachments]=useState([]);const[uploading,setUploading]=useState(false);
   const[newComment,setNewComment]=useState('');const[localTask,setLocalTask]=useState(task);
   const branchSlug=task.branch_slug;
-  useEffect(()=>{setLocalTask(task);loadSubtasks();loadComments();},[task.id]);
+  useEffect(()=>{setLocalTask(task);loadSubtasks();loadComments();loadAttachments();},[task.id]);
   async function loadSubtasks(){const{data}=await supabase.from('pipeline_subtasks').select('*, assignee:profiles!pipeline_subtasks_assignee_id_fkey(id,full_name)').eq('task_id',task.id).order('sort_order');if(data)setSubtasks(data);}
   async function loadComments(){const{data}=await supabase.from('pipeline_comments').select('*, author:profiles!pipeline_comments_user_id_fkey(full_name)').eq('task_id',task.id).order('created_at',{ascending:false});if(data)setComments(data);}
   async function updateField(f,v){if(readOnly)return;const u={...localTask,[f]:v};setLocalTask(u);await supabase.from('pipeline_tasks').update({[f]:v}).eq('id',task.id);if(onUpdate)onUpdate(u);}
   async function toggleSubtask(st){if(readOnly)return;await supabase.from('pipeline_subtasks').update({completed:!st.completed,completed_at:!st.completed?new Date().toISOString():null}).eq('id',st.id);loadSubtasks();}
   async function updateSubtaskAssignee(sid,uid){if(readOnly)return;await supabase.from('pipeline_subtasks').update({assignee_id:uid||null}).eq('id',sid);loadSubtasks();}
   async function addComment(){if(readOnly||!newComment.trim())return;const{data:{user}}=await supabase.auth.getUser();await supabase.from('pipeline_comments').insert({task_id:task.id,user_id:user.id,content:newComment.trim()});setNewComment('');loadComments();}
+  async function loadAttachments(){const{data}=await supabase.from('task_attachments').select('*, uploader:profiles!task_attachments_uploaded_by_fkey(full_name)').eq('task_id',task.id).order('created_at',{ascending:false});if(data)setAttachments(data);}
+  async function handleFileUpload(e){const file=e.target.files?.[0];if(!file||readOnly)return;if(file.size>10*1024*1024){alert('File must be under 10MB');return;}setUploading(true);const path=task.id+'/'+Date.now()+'-'+file.name;const{error:upErr}=await supabase.storage.from('attachments').upload(path,file);if(upErr){console.error(upErr);setUploading(false);return;}const{data:{publicUrl}}=supabase.storage.from('attachments').getPublicUrl(path);const{data:{user}}=await supabase.auth.getUser();await supabase.from('task_attachments').insert({task_id:task.id,file_name:file.name,file_url:publicUrl,file_size:file.size,file_type:file.type,uploaded_by:user?.id});setUploading(false);loadAttachments();}
+  async function deleteAttachment(att){if(readOnly)return;const path=att.file_url.split('/attachments/')[1];if(path)await supabase.storage.from('attachments').remove([path]);await supabase.from('task_attachments').delete().eq('id',att.id);loadAttachments();}
   const completed=subtasks.filter(s=>s.completed).length;const total=subtasks.length;const pct=total>0?Math.round((completed/total)*100):0;
   const statusColor=getStatusColor(localTask.status?.name||statuses?.find(s=>s.id===localTask.status_id)?.name);
   const contentTypeColor=CONTENT_TYPE_COLORS[localTask.content_type]||null;
