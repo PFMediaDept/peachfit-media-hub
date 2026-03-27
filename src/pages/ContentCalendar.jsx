@@ -207,6 +207,28 @@ function TaskDetailModal({task,onClose,members,statuses,onUpdate,readOnly=false}
                 <span style={{fontSize:11,color:'var(--text-muted)',marginLeft:8}}>{new Date(c.created_at).toLocaleString()}</span>
                 <p style={{margin:'4px 0 0',fontSize:13,color:'var(--text-light, #D1D5DB)'}}>{c.content}</p></div>))}</div>}
           </div>
+            {/* Attachments */}
+            <div style={ms.section}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                <h3 style={ms.sectionTitle}>Attachments</h3>
+                <span style={{fontSize:11,color:"var(--text-muted)"}}>{attachments.length} file{attachments.length!==1?"s":""}</span>
+              </div>
+              {!readOnly&&<label style={{display:"inline-flex",alignItems:"center",gap:6,background:CARD_LIGHT,border:"1px solid var(--dark-border)",borderRadius:6,padding:"6px 12px",fontSize:12,color:WHITE,cursor:"pointer",marginBottom:10}}>
+                {uploading?"Uploading...":"Attach file"}
+                <input type="file" onChange={handleFileUpload} style={{display:"none"}} disabled={uploading}/>
+              </label>}
+              {attachments.map(att=>(
+                <div key={att.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:"1px solid var(--dark-border)"}}>
+                  <span style={{fontSize:14}}>{att.file_type?.startsWith("image")?"🖼️":att.file_type?.includes("pdf")?"📄":"📎"}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <a href={att.file_url} target="_blank" rel="noopener" style={{fontSize:13,color:WHITE,fontWeight:500,textDecoration:"none"}}>{att.file_name}</a>
+                    <div style={{fontSize:10,color:"var(--text-muted)"}}>{att.uploader?.full_name||"Unknown"} -- {att.file_size?Math.round(att.file_size/1024)+"KB":""}</div>
+                  </div>
+                  {!readOnly&&<button onClick={()=>deleteAttachment(att)} style={{background:"transparent",border:"none",color:"#EF4444",fontSize:12,cursor:"pointer",padding:4}}>✕</button>}
+                </div>
+              ))}
+              {attachments.length===0&&<div style={{fontSize:12,color:"var(--text-muted)",padding:8}}>No files attached</div>}
+            </div>
           <div style={ms.right}>
             <div style={ms.section}><h3 style={ms.sectionTitle}>Details</h3>
               {localTask.content_pillar&&<FR label="Pillar"><span style={{fontSize:12,color:WHITE}}>{localTask.content_pillar}</span></FR>}
