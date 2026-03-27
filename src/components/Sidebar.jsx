@@ -126,7 +126,7 @@ export default function Sidebar() {
   return (
     <aside style={styles.sidebar}>
       <div style={styles.logo}>
-        <div style={styles.logoMark}>P</div>
+        <img src="/logo.avif" alt="PeachFit" style={styles.logoMark}/>
         <div>
           <div style={styles.logoText}>PeachFit</div>
           <div style={styles.logoSub}>Media Hub</div>
@@ -267,13 +267,13 @@ const styles = {
     width: '36px',
     height: '36px',
     borderRadius: '10px',
-    background: 'var(--green)',
-    color: 'var(--black)',
-    fontSize: '18px',
-    fontWeight: '700',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    
+    
+    
+    
+    objectFit: 'contain',
+    
+    
     flexShrink: 0,
   },
   logoText: {
@@ -317,8 +317,8 @@ const styles = {
     width: '32px',
     height: '32px',
     borderRadius: '8px',
-    background: 'var(--green)',
-    color: 'var(--black)',
+    
+    
     fontSize: '14px',
     fontWeight: '600',
     display: 'flex',

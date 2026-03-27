@@ -418,7 +418,7 @@ export function PublicCalendar(){
     <div style={{padding:'24px 32px',maxWidth:1200,margin:'0 auto',fontFamily:'Outfit,Arial,sans-serif'}}>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}}>
         <div><div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
-          <img src="/logo.avif" alt="PeachFit" style={{width:28,height:28,borderRadius:6,objectFit:'contain'}}/>
+          <img src="/logo.avif" alt="PeachFit" style={{width:40,height:40,borderRadius:8,objectFit:'contain'}}/>
           <h1 style={{fontSize:22,fontWeight:700,color:WHITE,margin:0}}>PeachFit Content Calendar</h1></div>
           <p style={{fontSize:12,color:'#6B7280',margin:0}}>Read-only view</p></div>
       </div>
