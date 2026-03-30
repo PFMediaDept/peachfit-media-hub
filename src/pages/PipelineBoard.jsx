@@ -327,7 +327,7 @@ function TaskDetail({ task, statuses, members, branchSlug, onClose, onUpdate }) 
               <div style={modal.field}><label style={modal.label}>Backlog Week</label>
                 <input type="text" value={form.backlog_week || ''} onChange={e => setForm(p => ({ ...p, backlog_week: e.target.value }))} placeholder="e.g. Week of 3/31" style={modal.input} /></div>
               <div style={modal.field}><label style={modal.label}>Platform</label>
-                {['Instagram Reels','TikTok','YouTube Shorts'].map(p => (
+                {['Instagram Reels','Instagram Stories','TikTok','YouTube Shorts','Facebook','Multi-Platform'].map(p => (
                   <label key={p} style={modal.checkLabel}><input type="checkbox" checked={(form.platform||[]).includes(p)} onChange={() => { const a=form.platform||[]; setForm(prev=>({...prev,platform:a.includes(p)?a.filter(x=>x!==p):[...a,p]})) }} />{p}</label>
                 ))}</div>
               <PillSelect label="QC Reviewer" value={form.qc_reviewer} options={[{ value: 'Garrett Harper', label: 'Garrett Harper' },{ value: 'Jacob Correia', label: 'Jacob Correia' },{ value: 'Tommy Bannister', label: 'Tommy Bannister' }]} onChange={v => setForm(p => ({ ...p, qc_reviewer: v }))} placeholder="Select..." />
