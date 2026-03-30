@@ -148,7 +148,7 @@ function ShareModal({onClose}){
               <span style={{fontSize:10,color:'var(--text-muted)',marginLeft:'auto'}}>{new Date(s.created_at).toLocaleDateString()}</span>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:6}}>
-              <div style={{flex:1,fontSize:10,color:'var(--text-muted)',fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+              <div style={{flex:1,fontSize:10,color:'var(--text-muted)',fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'100%'}}>
                 {window.location.origin.replace(/-[a-z0-9]+-pfmediadepts-projects/,'')}/calendar/public/{s.token}
               </div>
               <select value={s.permission||'view'} onChange={e=>updatePerm(s.id,e.target.value)} style={{background:CARD_LIGHT,border:'1px solid '+BORDER,borderRadius:4,color:WHITE,padding:'3px 6px',fontSize:10,outline:'none',cursor:'pointer'}}>
@@ -370,17 +370,17 @@ export default function ContentCalendar(){
         </div>
 
         {/* Calendar grid */}
-        <div style={{background:CARD,borderRadius:12,border:`1px solid ${BORDER}`,overflow:'hidden'}}>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:`1px solid ${BORDER}`}}>
+        <div style={{maxWidth:'100%',overflow:'hidden',background:CARD,borderRadius:12,border:`1px solid ${BORDER}`,overflow:'hidden'}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:`1px solid ${BORDER}`,overflow:'hidden'}}>
             {DAYS.map(d=>(<div key={d} style={{padding:'10px 8px',fontSize:12,fontWeight:600,color:'var(--text-secondary)',textAlign:'center'}}>{d}</div>))}
           </div>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)'}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',overflow:'hidden'}}>
             {displayDays.map(({date,inMonth},i)=>{
               const dateStr=fmt(date);const dayTasks=tasksByDate[dateStr]||[];const isToday=sameDay(date,today);const isDragOver=dragOver===dateStr;
               return(
                 <div key={i} onClick={()=>{if(dayTasks.length===0)setQuickAddDate(date);}}
                   onDragOver={e=>{e.preventDefault();setDragOver(dateStr);}} onDragLeave={()=>setDragOver(null)} onDrop={e=>{e.preventDefault();handleDrop(dateStr);}}
-                  style={{minHeight:viewMode==='month'?100:300,padding:6,borderRight:(i+1)%7!==0?`1px solid ${BORDER}`:'none',borderBottom:`1px solid ${BORDER}`,background:isDragOver?GREEN+'15':isToday?GREEN+'0D':'transparent',opacity:inMonth?1:0.35,cursor:dayTasks.length===0?'pointer':'default',transition:'background 0.15s'}}>
+                  style={{minHeight:viewMode==='month'?100:300,padding:6,minWidth:0,overflow:'hidden',borderRight:(i+1)%7!==0?`1px solid ${BORDER}`:'none',borderBottom:`1px solid ${BORDER}`,background:isDragOver?GREEN+'15':isToday?GREEN+'0D':'transparent',opacity:inMonth?1:0.35,cursor:dayTasks.length===0?'pointer':'default',transition:'background 0.15s'}}>
                   <div style={{fontSize:12,fontWeight:isToday?700:400,color:isToday?GREEN:'#9CA3AF',marginBottom:4,textAlign:'right',paddingRight:4}}>{date.getDate()}</div>
                   <div style={{display:'flex',flexDirection:'column',gap:2}}>
                     {dayTasks.slice(0,viewMode==='month'?4:20).map(t=>{
@@ -390,7 +390,7 @@ export default function ContentCalendar(){
                         <div key={t.id} draggable onDragStart={()=>setDragTask(t)} onDragEnd={()=>{setDragTask(null);setDragOver(null);}}
                           onClick={e=>{e.stopPropagation();setSelectedTask(t);}}
                           style={{...cs.eventPill,background:pillColor+'18',borderLeft:`3px solid ${pillColor}`,opacity:dragTask?.id===t.id?0.4:1,cursor:'grab'}}>
-                          <span style={{fontSize:11,fontWeight:500,color:WHITE,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}>{t.title}</span>
+                          <span style={{fontSize:11,fontWeight:500,color:WHITE,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'100%',flex:1}}>{t.title}</span>
                           <div style={{display:'flex',gap:3,alignItems:'center',flexShrink:0}}>
                             {isStory&&<span style={{fontSize:8,background:'#E040FB33',color:'#E040FB',padding:'0px 3px',borderRadius:2,fontWeight:700}}>IG</span>}
                             <div style={{width:6,height:6,borderRadius:'50%',background:BRANCH_COLORS[t.branch_slug]||'#6B7280'}}/>
@@ -511,7 +511,7 @@ export function PublicCalendar(){
         </div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)'}}>
           {displayDays.map(({date,inMonth},i)=>{const dateStr=fmt(date);const dayTasks=tasksByDate[dateStr]||[];const isToday=sameDay(date,today);
-            return(<div key={i} style={{minHeight:viewMode==='month'?100:300,padding:6,borderRight:(i+1)%7!==0?`1px solid ${BORDER}`:'none',borderBottom:`1px solid ${BORDER}`,background:isToday?GREEN+'0D':'transparent',opacity:inMonth?1:0.35}}>
+            return(<div key={i} style={{minHeight:viewMode==='month'?100:300,padding:6,minWidth:0,overflow:'hidden',borderRight:(i+1)%7!==0?`1px solid ${BORDER}`:'none',borderBottom:`1px solid ${BORDER}`,background:isToday?GREEN+'0D':'transparent',opacity:inMonth?1:0.35}}>
               <div style={{fontSize:12,fontWeight:isToday?700:400,color:isToday?GREEN:'#9CA3AF',marginBottom:4,textAlign:'right',paddingRight:4}}>{date.getDate()}</div>
               <div style={{display:'flex',flexDirection:'column',gap:2}}>
                 {dayTasks.slice(0,viewMode==='month'?4:20).map(t=>{const isStory=t.content_type==='story';const pillColor=isStory?'#E040FB':getStatusColor(t.status?.name);
