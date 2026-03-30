@@ -98,41 +98,67 @@ function QuickAddModal({date,statuses,onClose,onCreated}){
 }
 
 /* ── Share Link Modal ── */
+const PERM_LEVELS=[{value:'view',label:'View only',desc:'Can see the calendar but not change anything',icon:'👁️'},{value:'comment',label:'Can comment',desc:'Can see and leave notes but not move tasks',icon:'💬'},{value:'edit',label:'Can edit',desc:'Can move tasks, change dates, update status',icon:'✏️'},{value:'full',label:'Full access',desc:'Can add, edit, and delete tasks',icon:'🔓'}];
 function ShareModal({onClose}){
-  const[shares,setShares]=useState([]);const[creating,setCreating]=useState(false);const[copied,setCopied]=useState(null);
+  const[shares,setShares]=useState([]);const[creating,setCreating]=useState(false);const[copied,setCopied]=useState(null);const[newPerm,setNewPerm]=useState('view');const[newLabel,setNewLabel]=useState('');
   useEffect(()=>{loadShares();},[]);
   async function loadShares(){const{data}=await supabase.from('calendar_shares').select('*').eq('is_active',true).order('created_at',{ascending:false});if(data)setShares(data);}
   async function createShare(){
     setCreating(true);const{data:{user}}=await supabase.auth.getUser();
-    await supabase.from('calendar_shares').insert({label:'Shared Calendar',created_by:user?.id});
-    setCreating(false);loadShares();
+    await supabase.from('calendar_shares').insert({label:newLabel.trim()||'Shared Calendar',permission:newPerm,created_by:user?.id});
+    setCreating(false);setNewLabel('');setNewPerm('view');loadShares();
   }
+  async function updatePerm(id,perm){await supabase.from('calendar_shares').update({permission:perm}).eq('id',id);loadShares();}
   async function deactivate(id){await supabase.from('calendar_shares').update({is_active:false}).eq('id',id);loadShares();}
-  function copyLink(token){const url=`${window.location.origin}/calendar/public/${token}`;navigator.clipboard.writeText(url);setCopied(token);setTimeout(()=>setCopied(null),2000);}
+  function copyLink(token){const base=window.location.origin.replace(/-[a-z0-9]+-pfmediadepts-projects/,'');const url=base+'/calendar/public/'+token;navigator.clipboard.writeText(url);setCopied(token);setTimeout(()=>setCopied(null),2000);}
+  const permColor={view:'#6B7280',comment:'#3B82F6',edit:'#F59E0B',full:'#37CA37'};
   return(
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.5)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={onClose}>
-      <div style={{background:BG,border:`1px solid ${BORDER}`,borderRadius:12,padding:20,width:440,boxShadow:'0 16px 48px rgba(0,0,0,0.5)'}} onClick={e=>e.stopPropagation()}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-          <h3 style={{fontSize:14,fontWeight:700,color:WHITE,margin:0}}>Share Calendar</h3>
+      <div style={{background:BG,border:'1px solid '+BORDER,borderRadius:12,padding:24,width:500,boxShadow:'0 16px 48px rgba(0,0,0,0.5)',maxHeight:'80vh',overflowY:'auto'}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+          <h3 style={{fontSize:16,fontWeight:700,color:WHITE,margin:0}}>Share Calendar</h3>
           <button onClick={onClose} style={{background:'transparent',border:'none',color:'var(--text-secondary)',fontSize:18,cursor:'pointer'}}>&times;</button>
         </div>
-        <p style={{fontSize:12,color:'var(--text-muted)',margin:'0 0 16px'}}>Generate a read-only link anyone can view without logging in.</p>
-        <button onClick={createShare} disabled={creating} style={{background:GREEN,border:'none',borderRadius:6,color:'#000',padding:'8px 16px',fontSize:12,fontWeight:600,cursor:'pointer',marginBottom:16,opacity:creating?0.5:1,width:'100%'}}>
-          {creating?'Creating...':'Generate New Link'}
-        </button>
+        <div style={{background:CARD_LIGHT,border:'1px solid '+BORDER,borderRadius:8,padding:16,marginBottom:20}}>
+          <div style={{fontSize:12,fontWeight:600,color:'var(--text-secondary)',marginBottom:8}}>Create new share link</div>
+          <input value={newLabel} onChange={e=>setNewLabel(e.target.value)} placeholder="Label (e.g. Jacob, SOB Team, Aaron)" style={{width:'100%',boxSizing:'border-box',background:BG,border:'1px solid '+BORDER,borderRadius:6,color:WHITE,padding:'8px 10px',fontSize:12,outline:'none',marginBottom:10,fontFamily:'Outfit,Arial,sans-serif'}}/>
+          <div style={{fontSize:11,fontWeight:600,color:'var(--text-muted)',marginBottom:6}}>ACCESS LEVEL</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6,marginBottom:12}}>
+            {PERM_LEVELS.map(p=>(
+              <button key={p.value} onClick={()=>setNewPerm(p.value)} style={{display:'flex',alignItems:'flex-start',gap:8,padding:'8px 10px',background:newPerm===p.value?permColor[p.value]+'15':'transparent',border:'1px solid '+(newPerm===p.value?permColor[p.value]:BORDER),borderRadius:6,cursor:'pointer',textAlign:'left'}}>
+                <span style={{fontSize:14}}>{p.icon}</span>
+                <div><div style={{fontSize:11,fontWeight:600,color:newPerm===p.value?permColor[p.value]:WHITE}}>{p.label}</div>
+                <div style={{fontSize:10,color:'var(--text-muted)',lineHeight:1.3}}>{p.desc}</div></div>
+              </button>
+            ))}
+          </div>
+          <button onClick={createShare} disabled={creating} style={{background:GREEN,border:'none',borderRadius:6,color:'#000',padding:'10px 16px',fontSize:12,fontWeight:700,cursor:'pointer',opacity:creating?0.5:1,width:'100%'}}>
+            {creating?'Creating...':'Generate Share Link'}
+          </button>
+        </div>
+        <div style={{fontSize:12,fontWeight:600,color:'var(--text-secondary)',marginBottom:10}}>Active links ({shares.length})</div>
         {shares.length===0&&<div style={{padding:16,textAlign:'center',color:'var(--text-muted)',fontSize:12}}>No active share links</div>}
         {shares.map(s=>(
-          <div key={s.id} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 0',borderBottom:`1px solid ${BORDER}22`}}>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontSize:11,color:WHITE,fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-                {window.location.origin}/calendar/public/{s.token}
-              </div>
-              <span style={{fontSize:10,color:'var(--text-muted)'}}>Created {new Date(s.created_at).toLocaleDateString()}</span>
+          <div key={s.id} style={{padding:'12px 0',borderBottom:'1px solid '+BORDER+'22'}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+              <span style={{fontSize:13,fontWeight:600,color:WHITE}}>{s.label||'Shared Calendar'}</span>
+              <span style={{fontSize:10,fontWeight:600,color:permColor[s.permission||'view'],background:(permColor[s.permission||'view'])+'15',padding:'2px 6px',borderRadius:4}}>
+                {(PERM_LEVELS.find(p=>p.value===(s.permission||'view'))||{}).label||'View only'}
+              </span>
+              <span style={{fontSize:10,color:'var(--text-muted)',marginLeft:'auto'}}>{new Date(s.created_at).toLocaleDateString()}</span>
             </div>
-            <button onClick={()=>copyLink(s.token)} style={{background:copied===s.token?GREEN+'33':'transparent',border:`1px solid ${copied===s.token?GREEN:BORDER}`,borderRadius:4,color:copied===s.token?GREEN:'#9CA3AF',padding:'4px 8px',fontSize:10,fontWeight:600,cursor:'pointer',flexShrink:0}}>
-              {copied===s.token?'Copied':'Copy'}
-            </button>
-            <button onClick={()=>deactivate(s.id)} style={{background:'transparent',border:`1px solid ${BORDER}`,borderRadius:4,color:'#EF4444',padding:'4px 8px',fontSize:10,cursor:'pointer',flexShrink:0}}>Revoke</button>
+            <div style={{display:'flex',alignItems:'center',gap:6}}>
+              <div style={{flex:1,fontSize:10,color:'var(--text-muted)',fontFamily:'monospace',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                {window.location.origin.replace(/-[a-z0-9]+-pfmediadepts-projects/,'')}/calendar/public/{s.token}
+              </div>
+              <select value={s.permission||'view'} onChange={e=>updatePerm(s.id,e.target.value)} style={{background:CARD_LIGHT,border:'1px solid '+BORDER,borderRadius:4,color:WHITE,padding:'3px 6px',fontSize:10,outline:'none',cursor:'pointer'}}>
+                {PERM_LEVELS.map(p=><option key={p.value} value={p.value}>{p.label}</option>)}
+              </select>
+              <button onClick={()=>copyLink(s.token)} style={{background:copied===s.token?GREEN+'33':'transparent',border:'1px solid '+(copied===s.token?GREEN:BORDER),borderRadius:4,color:copied===s.token?GREEN:'#9CA3AF',padding:'3px 8px',fontSize:10,fontWeight:600,cursor:'pointer'}}>
+                {copied===s.token?'Copied':'Copy'}
+              </button>
+              <button onClick={()=>deactivate(s.id)} style={{background:'transparent',border:'1px solid '+BORDER,borderRadius:4,color:'#EF4444',padding:'3px 8px',fontSize:10,cursor:'pointer'}}>Revoke</button>
+            </div>
           </div>
         ))}
       </div>
@@ -259,7 +285,7 @@ export default function ContentCalendar(){
   const[tasks,setTasks]=useState([]);const[statuses,setStatuses]=useState([]);const[members,setMembers]=useState([]);
   const[curDate,setCurDate]=useState(new Date());const[viewMode,setViewMode]=useState('month');
   const[branchFilter,setBranchFilter]=useState('all');const[contentTypeFilter,setContentTypeFilter]=useState('all');
-  const[selectedTask,setSelectedTask]=useState(null);const[quickAddDate,setQuickAddDate]=useState(null);
+  const[selectedTask,setSelectedTask]=useState(null);const[permission,setPermission]=useState('view');const[quickAddDate,setQuickAddDate]=useState(null);
   const[dragTask,setDragTask]=useState(null);const[dragOver,setDragOver]=useState(null);
   const[sidebarOpen,setSidebarOpen]=useState(false);const[shareModal,setShareModal]=useState(false);
 
@@ -418,7 +444,7 @@ export default function ContentCalendar(){
 export function PublicCalendar(){
   const[tasks,setTasks]=useState([]);const[loading,setLoading]=useState(true);const[error,setError]=useState(null);
   const[curDate,setCurDate]=useState(new Date());const[viewMode,setViewMode]=useState('month');
-  const[branchFilter,setBranchFilter]=useState('all');const[selectedTask,setSelectedTask]=useState(null);
+  const[branchFilter,setBranchFilter]=useState('all');const[selectedTask,setSelectedTask]=useState(null);const[permission,setPermission]=useState('view');
 
   useEffect(()=>{loadPublic();},[]);
 
@@ -429,6 +455,7 @@ export function PublicCalendar(){
     if(err){setError('Invalid or expired link');setLoading(false);return;}
     if(data?.error){setError(data.error);setLoading(false);return;}
     setTasks((data||[]).map(t=>({...t,status:{name:t.status_name}})));
+    const token2=path.split('/').pop();const{data:shareData}=await supabase.from('calendar_shares').select('permission').eq('token',token2).eq('is_active',true).single();if(shareData)setPermission(shareData.permission||'view');
     setLoading(false);
   }
 
@@ -451,7 +478,7 @@ export function PublicCalendar(){
         <div><div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
           <img src="/logo.avif" alt="PeachFit" style={{width:40,height:40,borderRadius:8,objectFit:'contain'}}/>
           <h1 style={{fontSize:22,fontWeight:700,color:WHITE,margin:0}}>PeachFit Content Calendar</h1></div>
-          <p style={{fontSize:12,color:'var(--text-muted)',margin:0}}>Read-only view</p></div>
+          <p style={{fontSize:12,color:'var(--text-muted)',margin:0}}>{permission==='full'?'Full access':permission==='edit'?'Editor access':permission==='comment'?'Can comment':'Read-only view'}</p></div>
       </div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:12}}>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
