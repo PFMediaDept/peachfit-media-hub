@@ -15,6 +15,8 @@ import ProfileEdit from "./pages/ProfileEdit"
 import Analytics from "./pages/Analytics"
 import Reports from "./pages/Reports"
 import Operations from "./pages/Operations"
+import KnowledgeBase from "./pages/KnowledgeBase"
+import TrainingCenter from "./pages/TrainingCenter"
 import ActivityLog from "./pages/ActivityLog"
 import AdminUsers from './pages/AdminUsers'
 import AdminSOPs from './pages/AdminSOPs'
@@ -48,6 +50,8 @@ function App() {
               <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/operations" element={<ProtectedRoute><Operations /></ProtectedRoute>} />
+              <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />
+              <Route path="/training" element={<ProtectedRoute><TrainingCenter /></ProtectedRoute>} />
               <Route path="/activity" element={<ProtectedRoute><ActivityLog /></ProtectedRoute>} />
             <Route path="/calendar" element={<ContentCalendar />} />
 
