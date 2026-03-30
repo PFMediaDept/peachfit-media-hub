@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
 
 const GREEN = 'var(--green)';
@@ -28,7 +29,12 @@ export default function KnowledgeBase() {
 
   async function load() {
     const { data } = await supabase.from('knowledge_base').select('*').eq('is_published', true).order('category').order('sort_order');
-    if (data) setArticles(data);
+    if (data) {
+      setArticles(data);
+      const params = new URLSearchParams(window.location.search);
+      const articleId = params.get('article');
+      if (articleId) { const found = data.find(a => a.id === articleId); if (found) setSelectedArticle(found); }
+    }
     setLoading(false);
   }
 

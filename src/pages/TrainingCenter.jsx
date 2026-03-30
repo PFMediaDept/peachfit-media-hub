@@ -157,7 +157,7 @@ export default function TrainingCenter() {
                     </div>
                     {step.description && <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 0', lineHeight: 1.5 }}>{step.description}</p>}
                     {step.kb_article && (
-                      <button onClick={() => navigate('/knowledge-base')} style={{ background: 'rgba(55,202,55,0.1)', border: '1px solid rgba(55,202,55,0.2)', borderRadius: 4, color: '#37CA37', padding: '3px 8px', fontSize: 11, fontWeight: 600, cursor: 'pointer', marginTop: 6 }}>
+                      <button onClick={() => navigate('/knowledge-base?article=' + step.kb_article.id)} style={{ background: 'rgba(55,202,55,0.1)', border: '1px solid rgba(55,202,55,0.2)', borderRadius: 4, color: '#37CA37', padding: '3px 8px', fontSize: 11, fontWeight: 600, cursor: 'pointer', marginTop: 6 }}>
                         Read: {step.kb_article.title} &rarr;
                       </button>
                     )}
