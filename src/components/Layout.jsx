@@ -76,6 +76,7 @@ export default function Layout() {
   // Desktop layout
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <WelcomeTour />
       <Sidebar />
       <main style={{
         marginLeft: 'var(--sidebar-width)',
