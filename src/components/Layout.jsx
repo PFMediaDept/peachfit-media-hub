@@ -4,6 +4,7 @@ import Sidebar from './Sidebar'
 import NotificationBell from './NotificationBell'
 import MobileNav from './MobileNav'
 import ThemeToggle from "./ThemeToggle"
+import WelcomeTour from "./WelcomeTour"
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -31,6 +32,7 @@ export default function Layout() {
   if (isMobile) {
     return (
       <div style={{ minHeight: '100vh', paddingBottom: 72 }}>
+        <WelcomeTour />
         {/* Mobile top bar */}
         <div style={styles.mobileTopBar}>
           <button onClick={() => setSidebarOpen(true)} style={styles.menuBtn}>
