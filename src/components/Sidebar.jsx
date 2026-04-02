@@ -143,42 +143,12 @@ export default function Sidebar() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
           <span>My Tasks</span>
         </NavLink>
-        <NavLink to="/team" style={navLinkStyle}>
-          {sectionIcons.team}
-          <span>Team directory</span>
-        </NavLink>
-        <NavLink to="/standards" style={navLinkStyle}>
-          {sectionIcons.standards}
-          <span>Dept standards</span>
-        </NavLink>
-        <NavLink to="/assets" style={navLinkStyle}>
-          {sectionIcons.assets}
-          <span>Brand assets</span>
-        </NavLink>
-        <NavLink to="/links" style={navLinkStyle}>
-          {sectionIcons.links}
-          <span>Quick links</span>
-        </NavLink>
         <NavLink to="/calendar" style={navLinkStyle}>
           {sectionIcons.calendar}
-          <span>Content calendar</span>
+          <span>Content Calendar</span>
         </NavLink>
-        <NavLink to="/analytics" style={navLinkStyle}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          <span>Analytics</span>
-        </NavLink>
-        <NavLink to="/reports" style={navLinkStyle}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <span>Reports</span>
-        </NavLink>
-        <NavLink to="/operations" style={navLinkStyle}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span>Operations</span>
-        </NavLink>
-        <NavLink to="/activity" style={navLinkStyle}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          <span>Activity Log</span>
-        </NavLink>
+
+        <div style={{ ...styles.sectionLabel, marginTop: '20px' }}>Department</div>
         <NavLink to="/knowledge-base" style={navLinkStyle}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
           <span>Knowledge Base</span>
@@ -186,6 +156,22 @@ export default function Sidebar() {
         <NavLink to="/training" style={navLinkStyle}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
           <span>Training Center</span>
+        </NavLink>
+        <NavLink to="/team" style={navLinkStyle}>
+          {sectionIcons.team}
+          <span>Team Directory</span>
+        </NavLink>
+        <NavLink to="/standards" style={navLinkStyle}>
+          {sectionIcons.standards}
+          <span>Dept Standards</span>
+        </NavLink>
+        <NavLink to="/assets" style={navLinkStyle}>
+          {sectionIcons.assets}
+          <span>Brand Assets</span>
+        </NavLink>
+        <NavLink to="/links" style={navLinkStyle}>
+          {sectionIcons.links}
+          <span>Quick Links</span>
         </NavLink>
 
         {branches.length > 0 && (
@@ -210,12 +196,14 @@ export default function Sidebar() {
                   </NavLink>
                   <NavLink to={`/branch/${branch.slug}/sops`} style={navLinkStyle}>
                     {sectionIcons.sops}
-                    <span>SOPs & training</span>
+                    <span>SOPs</span>
                   </NavLink>
-                  <NavLink to={`/branch/${branch.slug}/onboarding`} style={navLinkStyle}>
-                    {sectionIcons.onboarding}
-                    <span>Onboarding</span>
-                  </NavLink>
+                  {branch.slug === 'youtube' && (
+                    <NavLink to="/analytics" style={navLinkStyle}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                      <span>Analytics</span>
+                    </NavLink>
+                  )}
                 </div>
               </div>
             ))}
@@ -225,13 +213,25 @@ export default function Sidebar() {
         {isAdmin && (
           <>
             <div style={{ ...styles.sectionLabel, marginTop: '20px' }}>Admin</div>
+            <NavLink to="/reports" style={navLinkStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Reports</span>
+            </NavLink>
+            <NavLink to="/operations" style={navLinkStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>Operations</span>
+            </NavLink>
+            <NavLink to="/activity" style={navLinkStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Activity Log</span>
+            </NavLink>
             <NavLink to="/admin/users" style={navLinkStyle}>
               {sectionIcons.admin}
-              <span>User management</span>
+              <span>User Management</span>
             </NavLink>
             <NavLink to="/admin/sops" style={navLinkStyle}>
               {sectionIcons.sops}
-              <span>SOP manager</span>
+              <span>SOP Manager</span>
             </NavLink>
             <NavLink to="/admin/announcements" style={navLinkStyle}>
               {sectionIcons.dashboard}
@@ -239,7 +239,7 @@ export default function Sidebar() {
             </NavLink>
             <NavLink to="/admin/onboarding" style={navLinkStyle}>
               {sectionIcons.onboarding}
-              <span>Onboarding editor</span>
+              <span>Onboarding Editor</span>
             </NavLink>
             <NavLink to="/admin/settings" style={navLinkStyle}>
               {sectionIcons.admin}
