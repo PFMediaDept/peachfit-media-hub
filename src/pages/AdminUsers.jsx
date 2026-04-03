@@ -14,7 +14,7 @@ export default function AdminUsers() {
   const [allBranches, setAllBranches] = useState([]);
   const [showInvite, setShowInvite] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [inviteForm, setInviteForm] = useState({ email: '', full_name: '', title: '', role: 'member', branch_ids: [] });
+  const [inviteForm, setInviteForm] = useState({ email: '', full_name: '', title: '', role: 'member', branch_ids: [], slack_user_id: '' });
   const [inviteLoading, setInviteLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -45,7 +45,7 @@ export default function AdminUsers() {
         if (signUpError) throw signUpError;
         const userId = signUpData.user?.id;
         if (userId) {
-          await supabase.from('profiles').upsert({ id: userId, email: inviteForm.email, full_name: inviteForm.full_name, title: inviteForm.title, role: inviteForm.role });
+          await supabase.from('profiles').upsert({ id: userId, email: inviteForm.email, full_name: inviteForm.full_name, title: inviteForm.title, role: inviteForm.role, slack_user_id: inviteForm.slack_user_id || null });
           if (inviteForm.branch_ids.length > 0) {
             await supabase.from('user_branches').insert(inviteForm.branch_ids.map(bid => ({ user_id: userId, branch_id: bid })));
           }
@@ -53,7 +53,7 @@ export default function AdminUsers() {
       }
       setMessage('Invite sent successfully.');
       setShowInvite(false);
-      setInviteForm({ email: '', full_name: '', title: '', role: 'member', branch_ids: [] });
+      setInviteForm({ email: '', full_name: '', title: '', role: 'member', branch_ids: [], slack_user_id: '' });
       fetchUsers();
     } catch (err) {
       setMessage('Error: ' + err.message);

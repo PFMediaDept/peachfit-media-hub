@@ -13,6 +13,7 @@ import ContentCalendar, { PublicCalendar } from "./pages/ContentCalendar"
 import MyTasks from "./pages/MyTasks"
 import ProfileEdit from "./pages/ProfileEdit"
 import Analytics from "./pages/Analytics"
+import ConceptBacklog from './pages/ConceptBacklog'
 import Reports from "./pages/Reports"
 import Operations from "./pages/Operations"
 import KnowledgeBase from "./pages/KnowledgeBase"
@@ -48,6 +49,7 @@ function App() {
               <Route path="/my-tasks" element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
               <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+		<Route path="/youtube/backlog" element={<ProtectedRoute><ConceptBacklog /></ProtectedRoute>} />
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/operations" element={<ProtectedRoute><Operations /></ProtectedRoute>} />
               <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />
