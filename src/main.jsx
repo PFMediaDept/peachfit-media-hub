@@ -16,6 +16,7 @@ import Analytics from "./pages/Analytics"
 import ConceptBacklog from './pages/ConceptBacklog'
 import ThumbnailTracker from './pages/ThumbnailTracker'
 import HookAnalysis from './pages/HookAnalysis'
+import CompetitiveBrief from './pages/CompetitiveBrief'
 import Reports from "./pages/Reports"
 import Operations from "./pages/Operations"
 import KnowledgeBase from "./pages/KnowledgeBase"
@@ -54,6 +55,7 @@ function App() {
               <Route path="/youtube/backlog" element={<ProtectedRoute><ConceptBacklog /></ProtectedRoute>} />
               <Route path="/youtube/thumbnails" element={<ProtectedRoute><ThumbnailTracker /></ProtectedRoute>} />
               <Route path="/youtube/hooks" element={<ProtectedRoute><HookAnalysis /></ProtectedRoute>} />
+              <Route path="/youtube/competitive" element={<ProtectedRoute><CompetitiveBrief /></ProtectedRoute>} />
               <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
               <Route path="/operations" element={<ProtectedRoute><Operations /></ProtectedRoute>} />
               <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />

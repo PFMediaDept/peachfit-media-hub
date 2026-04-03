@@ -162,6 +162,10 @@ export default function Sidebar() {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                         <span>Hooks</span>
                       </NavLink>
+                      <NavLink to="/youtube/competitive" style={navLinkStyle}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>Competitive Intel</span>
+                      </NavLink>
                     </>
                   )}
                 </div>
