@@ -95,10 +95,10 @@ const sectionIcons = {
 }
 
 const branchColors = {
-  youtube: '#FF0000',
-  'short-form': '#8B5CF6',
-  'ads-creative': '#F59E0B',
-  production: '#3B82F6',
+  youtube: '#378ADD',
+  'short-form': '#7F77DD',
+  'ads-creative': '#D85A30',
+  production: '#D4537E',
 }
 
 export default function Sidebar() {
@@ -126,7 +126,7 @@ export default function Sidebar() {
   return (
     <aside style={styles.sidebar}>
       <div style={styles.logo}>
-        <img src="/logo.avif" alt="PeachFit" style={styles.logoMark}/>
+        <div style={styles.logoMark}>P</div>
         <div>
           <div style={styles.logoText}>PeachFit</div>
           <div style={styles.logoSub}>Media Hub</div>
@@ -139,39 +139,25 @@ export default function Sidebar() {
           {sectionIcons.dashboard}
           <span>Dashboard</span>
         </NavLink>
-        <NavLink to="/my-tasks" style={navLinkStyle}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-          <span>My Tasks</span>
-        </NavLink>
-        <NavLink to="/calendar" style={navLinkStyle}>
-          {sectionIcons.calendar}
-          <span>Content Calendar</span>
-        </NavLink>
-
-        <div style={{ ...styles.sectionLabel, marginTop: '20px' }}>Department</div>
-        <NavLink to="/knowledge-base" style={navLinkStyle}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-          <span>Knowledge Base</span>
-        </NavLink>
-        <NavLink to="/training" style={navLinkStyle}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
-          <span>Training Center</span>
-        </NavLink>
         <NavLink to="/team" style={navLinkStyle}>
           {sectionIcons.team}
-          <span>Team Directory</span>
+          <span>Team directory</span>
         </NavLink>
         <NavLink to="/standards" style={navLinkStyle}>
           {sectionIcons.standards}
-          <span>Dept Standards</span>
+          <span>Dept standards</span>
         </NavLink>
         <NavLink to="/assets" style={navLinkStyle}>
           {sectionIcons.assets}
-          <span>Brand Assets</span>
+          <span>Brand assets</span>
         </NavLink>
         <NavLink to="/links" style={navLinkStyle}>
           {sectionIcons.links}
-          <span>Quick Links</span>
+          <span>Quick links</span>
+        </NavLink>
+        <NavLink to="/calendar" style={navLinkStyle}>
+          {sectionIcons.calendar}
+          <span>Content calendar</span>
         </NavLink>
 
         {branches.length > 0 && (
@@ -196,20 +182,12 @@ export default function Sidebar() {
                   </NavLink>
                   <NavLink to={`/branch/${branch.slug}/sops`} style={navLinkStyle}>
                     {sectionIcons.sops}
-                    <span>SOPs</span>
+                    <span>SOPs & training</span>
                   </NavLink>
-                  {branch.slug === 'youtube' && (
-                    <>
-                      <NavLink to="/analytics" style={navLinkStyle}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        <span>Analytics</span>
-                      </NavLink>
-                      <NavLink to="/youtube/backlog" style={navLinkStyle}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                        <span>Concept Backlog</span>
-                      </NavLink>
-                    </>
-                  )}
+                  <NavLink to={`/branch/${branch.slug}/onboarding`} style={navLinkStyle}>
+                    {sectionIcons.onboarding}
+                    <span>Onboarding</span>
+                  </NavLink>
                 </div>
               </div>
             ))}
@@ -219,25 +197,13 @@ export default function Sidebar() {
         {isAdmin && (
           <>
             <div style={{ ...styles.sectionLabel, marginTop: '20px' }}>Admin</div>
-            <NavLink to="/reports" style={navLinkStyle}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              <span>Reports</span>
-            </NavLink>
-            <NavLink to="/operations" style={navLinkStyle}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span>Operations</span>
-            </NavLink>
-            <NavLink to="/activity" style={navLinkStyle}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              <span>Activity Log</span>
-            </NavLink>
             <NavLink to="/admin/users" style={navLinkStyle}>
               {sectionIcons.admin}
-              <span>User Management</span>
+              <span>User management</span>
             </NavLink>
             <NavLink to="/admin/sops" style={navLinkStyle}>
               {sectionIcons.sops}
-              <span>SOP Manager</span>
+              <span>SOP manager</span>
             </NavLink>
             <NavLink to="/admin/announcements" style={navLinkStyle}>
               {sectionIcons.dashboard}
@@ -245,7 +211,7 @@ export default function Sidebar() {
             </NavLink>
             <NavLink to="/admin/onboarding" style={navLinkStyle}>
               {sectionIcons.onboarding}
-              <span>Onboarding Editor</span>
+              <span>Onboarding editor</span>
             </NavLink>
             <NavLink to="/admin/settings" style={navLinkStyle}>
               {sectionIcons.admin}
@@ -256,17 +222,15 @@ export default function Sidebar() {
       </nav>
 
       <div style={styles.userArea}>
-        <a href="/profile" style={{...styles.userInfo, textDecoration: "none", cursor: "pointer"}}>
-          {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt="" style={{...styles.avatar, objectFit: "cover"}} />
-          ) : (
-            <div style={styles.avatar}>{profile?.full_name?.charAt(0) || "U"}</div>
-          )}
+        <div style={styles.userInfo}>
+          <div style={styles.avatar}>
+            {profile?.full_name?.charAt(0) || 'U'}
+          </div>
           <div>
             <div style={styles.userName}>{profile?.full_name || 'User'}</div>
             <div style={styles.userRole}>{profile?.title || 'Team Member'}</div>
           </div>
-        </a>
+        </div>
         <button onClick={handleSignOut} style={styles.signOut}>
           Sign out
         </button>
@@ -280,7 +244,6 @@ const styles = {
     width: 'var(--sidebar-width)',
     height: '100vh',
     position: 'fixed',
-    overflowY: 'auto',
     left: 0,
     top: 0,
     background: 'var(--dark-card)',
@@ -297,10 +260,16 @@ const styles = {
     borderBottom: '1px solid var(--dark-border)',
   },
   logoMark: {
-    width: '44px',
-    height: '44px',
-    borderRadius: '0',
-    objectFit: 'contain',
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    background: 'var(--green)',
+    color: 'var(--black)',
+    fontSize: '18px',
+    fontWeight: '700',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
   },
   logoText: {
@@ -344,6 +313,8 @@ const styles = {
     width: '32px',
     height: '32px',
     borderRadius: '8px',
+    background: 'var(--green)',
+    color: 'var(--black)',
     fontSize: '14px',
     fontWeight: '600',
     display: 'flex',
