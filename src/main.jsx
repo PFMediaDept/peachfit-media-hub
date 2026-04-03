@@ -5,10 +5,22 @@ import { AuthProvider } from './lib/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import ResetPassword from "./pages/ResetPassword"
 import Dashboard from './pages/Dashboard'
 import Branch, { BranchOverview, BranchSOPs, BranchOnboarding } from './pages/Branch'
 import PipelineBoard from './pages/PipelineBoard'
-import ContentCalendar from './pages/ContentCalendar'
+import ContentCalendar, { PublicCalendar } from "./pages/ContentCalendar"
+import MyTasks from "./pages/MyTasks"
+import ProfileEdit from "./pages/ProfileEdit"
+import Analytics from "./pages/Analytics"
+import ConceptBacklog from './pages/ConceptBacklog'
+import ThumbnailTracker from './pages/ThumbnailTracker'
+import HookAnalysis from './pages/HookAnalysis'
+import Reports from "./pages/Reports"
+import Operations from "./pages/Operations"
+import KnowledgeBase from "./pages/KnowledgeBase"
+import TrainingCenter from "./pages/TrainingCenter"
+import ActivityLog from "./pages/ActivityLog"
 import AdminUsers from './pages/AdminUsers'
 import AdminSOPs from './pages/AdminSOPs'
 import AdminAnnouncements from './pages/AdminAnnouncements'
@@ -23,6 +35,8 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/calendar/public/:token" element={<PublicCalendar />} />
 
           <Route element={
             <ProtectedRoute>
@@ -34,6 +48,17 @@ function App() {
             <Route path="/standards" element={<DeptStandards />} />
             <Route path="/assets" element={<BrandAssets />} />
             <Route path="/links" element={<QuickLinks />} />
+              <Route path="/my-tasks" element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+              <Route path="/youtube/backlog" element={<ProtectedRoute><ConceptBacklog /></ProtectedRoute>} />
+              <Route path="/youtube/thumbnails" element={<ProtectedRoute><ThumbnailTracker /></ProtectedRoute>} />
+              <Route path="/youtube/hooks" element={<ProtectedRoute><HookAnalysis /></ProtectedRoute>} />
+              <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+              <Route path="/operations" element={<ProtectedRoute><Operations /></ProtectedRoute>} />
+              <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />
+              <Route path="/training" element={<ProtectedRoute><TrainingCenter /></ProtectedRoute>} />
+              <Route path="/activity" element={<ProtectedRoute><ActivityLog /></ProtectedRoute>} />
             <Route path="/calendar" element={<ContentCalendar />} />
 
             <Route path="/branch/:slug" element={<Branch />}>

@@ -28,77 +28,23 @@ const branchIcons = {
 }
 
 const sectionIcons = {
-  dashboard: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
-    </svg>
-  ),
-  pipeline: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-    </svg>
-  ),
-  sops: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-    </svg>
-  ),
-  onboarding: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  ),
-  assets: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-      <circle cx="8.5" cy="8.5" r="1.5" />
-      <polyline points="21 15 16 10 5 21" />
-    </svg>
-  ),
-  team: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  ),
-  standards: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  ),
-  links: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-    </svg>
-  ),
-  calendar: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  ),
-  admin: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-    </svg>
-  ),
+  dashboard: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>),
+  pipeline: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>),
+  sops: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>),
+  onboarding: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>),
+  assets: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>),
+  team: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>),
+  standards: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>),
+  links: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>),
+  calendar: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>),
+  admin: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>),
 }
 
 const branchColors = {
-  youtube: '#378ADD',
-  'short-form': '#7F77DD',
-  'ads-creative': '#D85A30',
-  production: '#D4537E',
+  youtube: '#FF0000',
+  'short-form': '#8B5CF6',
+  'ads-creative': '#F59E0B',
+  production: '#3B82F6',
 }
 
 export default function Sidebar() {
@@ -126,7 +72,7 @@ export default function Sidebar() {
   return (
     <aside style={styles.sidebar}>
       <div style={styles.logo}>
-        <div style={styles.logoMark}>P</div>
+        <img src="/logo.avif" alt="PeachFit" style={styles.logoMark}/>
         <div>
           <div style={styles.logoText}>PeachFit</div>
           <div style={styles.logoSub}>Media Hub</div>
@@ -139,25 +85,39 @@ export default function Sidebar() {
           {sectionIcons.dashboard}
           <span>Dashboard</span>
         </NavLink>
-        <NavLink to="/team" style={navLinkStyle}>
-          {sectionIcons.team}
-          <span>Team directory</span>
-        </NavLink>
-        <NavLink to="/standards" style={navLinkStyle}>
-          {sectionIcons.standards}
-          <span>Dept standards</span>
-        </NavLink>
-        <NavLink to="/assets" style={navLinkStyle}>
-          {sectionIcons.assets}
-          <span>Brand assets</span>
-        </NavLink>
-        <NavLink to="/links" style={navLinkStyle}>
-          {sectionIcons.links}
-          <span>Quick links</span>
+        <NavLink to="/my-tasks" style={navLinkStyle}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <span>My Tasks</span>
         </NavLink>
         <NavLink to="/calendar" style={navLinkStyle}>
           {sectionIcons.calendar}
-          <span>Content calendar</span>
+          <span>Content Calendar</span>
+        </NavLink>
+
+        <div style={{ ...styles.sectionLabel, marginTop: '20px' }}>Department</div>
+        <NavLink to="/knowledge-base" style={navLinkStyle}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          <span>Knowledge Base</span>
+        </NavLink>
+        <NavLink to="/training" style={navLinkStyle}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>
+          <span>Training Center</span>
+        </NavLink>
+        <NavLink to="/team" style={navLinkStyle}>
+          {sectionIcons.team}
+          <span>Team Directory</span>
+        </NavLink>
+        <NavLink to="/standards" style={navLinkStyle}>
+          {sectionIcons.standards}
+          <span>Dept Standards</span>
+        </NavLink>
+        <NavLink to="/assets" style={navLinkStyle}>
+          {sectionIcons.assets}
+          <span>Brand Assets</span>
+        </NavLink>
+        <NavLink to="/links" style={navLinkStyle}>
+          {sectionIcons.links}
+          <span>Quick Links</span>
         </NavLink>
 
         {branches.length > 0 && (
@@ -182,12 +142,28 @@ export default function Sidebar() {
                   </NavLink>
                   <NavLink to={`/branch/${branch.slug}/sops`} style={navLinkStyle}>
                     {sectionIcons.sops}
-                    <span>SOPs & training</span>
+                    <span>SOPs</span>
                   </NavLink>
-                  <NavLink to={`/branch/${branch.slug}/onboarding`} style={navLinkStyle}>
-                    {sectionIcons.onboarding}
-                    <span>Onboarding</span>
-                  </NavLink>
+                  {branch.slug === 'youtube' && (
+                    <>
+                      <NavLink to="/analytics" style={navLinkStyle}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        <span>Analytics</span>
+                      </NavLink>
+                      <NavLink to="/youtube/backlog" style={navLinkStyle}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                        <span>Concept Backlog</span>
+                      </NavLink>
+                      <NavLink to="/youtube/thumbnails" style={navLinkStyle}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>Thumbnails</span>
+                      </NavLink>
+                      <NavLink to="/youtube/hooks" style={navLinkStyle}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <span>Hooks</span>
+                      </NavLink>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
@@ -197,13 +173,25 @@ export default function Sidebar() {
         {isAdmin && (
           <>
             <div style={{ ...styles.sectionLabel, marginTop: '20px' }}>Admin</div>
+            <NavLink to="/reports" style={navLinkStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Reports</span>
+            </NavLink>
+            <NavLink to="/operations" style={navLinkStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>Operations</span>
+            </NavLink>
+            <NavLink to="/activity" style={navLinkStyle}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Activity Log</span>
+            </NavLink>
             <NavLink to="/admin/users" style={navLinkStyle}>
               {sectionIcons.admin}
-              <span>User management</span>
+              <span>User Management</span>
             </NavLink>
             <NavLink to="/admin/sops" style={navLinkStyle}>
               {sectionIcons.sops}
-              <span>SOP manager</span>
+              <span>SOP Manager</span>
             </NavLink>
             <NavLink to="/admin/announcements" style={navLinkStyle}>
               {sectionIcons.dashboard}
@@ -211,7 +199,7 @@ export default function Sidebar() {
             </NavLink>
             <NavLink to="/admin/onboarding" style={navLinkStyle}>
               {sectionIcons.onboarding}
-              <span>Onboarding editor</span>
+              <span>Onboarding Editor</span>
             </NavLink>
             <NavLink to="/admin/settings" style={navLinkStyle}>
               {sectionIcons.admin}
@@ -222,15 +210,17 @@ export default function Sidebar() {
       </nav>
 
       <div style={styles.userArea}>
-        <div style={styles.userInfo}>
-          <div style={styles.avatar}>
-            {profile?.full_name?.charAt(0) || 'U'}
-          </div>
+        <a href="/profile" style={{...styles.userInfo, textDecoration: "none", cursor: "pointer"}}>
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt="" style={{...styles.avatar, objectFit: "cover"}} />
+          ) : (
+            <div style={styles.avatar}>{profile?.full_name?.charAt(0) || "U"}</div>
+          )}
           <div>
             <div style={styles.userName}>{profile?.full_name || 'User'}</div>
             <div style={styles.userRole}>{profile?.title || 'Team Member'}</div>
           </div>
-        </div>
+        </a>
         <button onClick={handleSignOut} style={styles.signOut}>
           Sign out
         </button>
@@ -240,105 +230,18 @@ export default function Sidebar() {
 }
 
 const styles = {
-  sidebar: {
-    width: 'var(--sidebar-width)',
-    height: '100vh',
-    position: 'fixed',
-    left: 0,
-    top: 0,
-    background: 'var(--dark-card)',
-    borderRight: '1px solid var(--dark-border)',
-    display: 'flex',
-    flexDirection: 'column',
-    zIndex: 100,
-  },
-  logo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '20px 20px 16px',
-    borderBottom: '1px solid var(--dark-border)',
-  },
-  logoMark: {
-    width: '36px',
-    height: '36px',
-    borderRadius: '10px',
-    background: 'var(--green)',
-    color: 'var(--black)',
-    fontSize: '18px',
-    fontWeight: '700',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  logoText: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: 'var(--white)',
-  },
-  logoSub: {
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-  },
-  nav: {
-    flex: 1,
-    overflowY: 'auto',
-    padding: '16px 12px',
-  },
-  sectionLabel: {
-    fontSize: '11px',
-    fontWeight: '600',
-    color: 'var(--text-muted)',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    padding: '4px 14px 8px',
-  },
-  subNav: {
-    paddingLeft: '16px',
-  },
-  userArea: {
-    padding: '16px',
-    borderTop: '1px solid var(--dark-border)',
-  },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '12px',
-  },
-  avatar: {
-    width: '32px',
-    height: '32px',
-    borderRadius: '8px',
-    background: 'var(--green)',
-    color: 'var(--black)',
-    fontSize: '14px',
-    fontWeight: '600',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  userName: {
-    fontSize: '13px',
-    fontWeight: '500',
-    color: 'var(--white)',
-  },
-  userRole: {
-    fontSize: '11px',
-    color: 'var(--text-muted)',
-  },
-  signOut: {
-    width: '100%',
-    padding: '8px',
-    background: 'transparent',
-    border: '1px solid var(--dark-border)',
-    borderRadius: '8px',
-    color: 'var(--text-secondary)',
-    fontSize: '13px',
-    cursor: 'pointer',
-  },
+  sidebar: { width: 'var(--sidebar-width)', height: '100vh', position: 'fixed', overflowY: 'auto', left: 0, top: 0, background: 'var(--dark-card)', borderRight: '1px solid var(--dark-border)', display: 'flex', flexDirection: 'column', zIndex: 100 },
+  logo: { display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 20px 16px', borderBottom: '1px solid var(--dark-border)' },
+  logoMark: { width: '44px', height: '44px', borderRadius: '0', objectFit: 'contain', flexShrink: 0 },
+  logoText: { fontSize: '16px', fontWeight: '600', color: 'var(--white)' },
+  logoSub: { fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' },
+  nav: { flex: 1, overflowY: 'auto', padding: '16px 12px' },
+  sectionLabel: { fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', padding: '4px 14px 8px' },
+  subNav: { paddingLeft: '16px' },
+  userArea: { padding: '16px', borderTop: '1px solid var(--dark-border)' },
+  userInfo: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' },
+  avatar: { width: '32px', height: '32px', borderRadius: '8px', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  userName: { fontSize: '13px', fontWeight: '500', color: 'var(--white)' },
+  userRole: { fontSize: '11px', color: 'var(--text-muted)' },
+  signOut: { width: '100%', padding: '8px', background: 'transparent', border: '1px solid var(--dark-border)', borderRadius: '8px', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer' },
 }
