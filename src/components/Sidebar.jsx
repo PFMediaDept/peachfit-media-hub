@@ -199,10 +199,16 @@ export default function Sidebar() {
                     <span>SOPs</span>
                   </NavLink>
                   {branch.slug === 'youtube' && (
-                    <NavLink to="/analytics" style={navLinkStyle}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                      <span>Analytics</span>
-                    </NavLink>
+                    <>
+                      <NavLink to="/analytics" style={navLinkStyle}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        <span>Analytics</span>
+                      </NavLink>
+                      <NavLink to="/youtube/backlog" style={navLinkStyle}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                        <span>Concept Backlog</span>
+                      </NavLink>
+                    </>
                   )}
                 </div>
               </div>
@@ -294,13 +300,7 @@ const styles = {
     width: '44px',
     height: '44px',
     borderRadius: '0',
-    
-    
-    
-    
     objectFit: 'contain',
-    
-    
     flexShrink: 0,
   },
   logoText: {
@@ -344,8 +344,6 @@ const styles = {
     width: '32px',
     height: '32px',
     borderRadius: '8px',
-    
-    
     fontSize: '14px',
     fontWeight: '600',
     display: 'flex',
