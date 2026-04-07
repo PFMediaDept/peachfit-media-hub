@@ -445,11 +445,11 @@ export default function PipelineBoard() {
   useEffect(() => { fetchStatuses(); fetchTasks(); fetchMembers() }, [slug])
 
   async function fetchStatuses() {
-    const { data } = await supabase.from('pipeline_statuses').select('*').eq('branch_slug', slug).neq('is_sob', true).order('sort_order')
+    const { data } = await supabase.from('pipeline_statuses').select('*').eq('branch_slug', slug).order('sort_order')
     setStatuses(data || [])
   }
   async function fetchTasks() {
-    const { data, error } = await supabase.from('pipeline_tasks').select('*').eq('branch_slug', slug).neq('is_sob', true).order('sort_order')
+    const { data, error } = await supabase.from('pipeline_tasks').select('*').eq('branch_slug', slug).order('sort_order')
     if (error) console.error('fetchTasks error:', error)
     const list = data || []; setTasks(list)
     if (list.length > 0) {
