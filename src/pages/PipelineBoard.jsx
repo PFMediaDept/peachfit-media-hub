@@ -451,7 +451,7 @@ export default function PipelineBoard() {
   async function fetchTasks() {
     const { data, error } = await supabase.from('pipeline_tasks').select('*').eq('branch_slug', slug).order('sort_order')
     if (error) console.error('fetchTasks error:', error)
-    const list = data || []; setTasks(list)
+    const list = (data || []).filter(t => !t.is_sob); setTasks(list)
     if (list.length > 0) {
       const { data: subs } = await supabase.from('pipeline_subtasks').select('task_id, completed').in('task_id', list.map(t => t.id))
       const counts = {}; (subs || []).forEach(s => { if (!counts[s.task_id]) counts[s.task_id] = { done: 0, total: 0 }; counts[s.task_id].total++; if (s.completed) counts[s.task_id].done++ })
